@@ -137,7 +137,7 @@
         async function renderTable() {
             try {
                 // Gọi API qua Vercel Rewrites
-                const res = await fetch('/api/chemicals');
+                const res = await fetch('https://hvlab.onrender.com/api/chemicals');
                 const data = await res.json();
                 const tbody = document.getElementById('chem-list');
                 tbody.innerHTML = '';
@@ -192,7 +192,7 @@
         async function deleteChemical(id) {
             if(!confirm("Bạn có chắc chắn muốn xóa hóa chất này?")) return;
             try {
-                const res = await fetch(`/api/chemicals/${id}`, { method: 'DELETE' });
+                const res = await fetch(`https://hvlab.onrender.com/api/chemicals/${id}`, { method: 'DELETE' });
                 if(res.ok) renderTable();
                 else alert("Xóa thất bại!");
             } catch(e) { alert("Lỗi kết nối khi xóa!"); }
