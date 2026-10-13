@@ -149,7 +149,7 @@
 
             try {
                 // Kết nối tới Backend FastAPI
-                const res = await fetch(`http://127.0.0.1:8000/api/chemicals/${chemId}`);
+                const res = await fetch('https://hvlab.onrender.com/api/chemicals')
                 if (!res.ok) throw new Error("Không tìm thấy");
                 
                 const data = await res.json();
