@@ -35,7 +35,7 @@
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        <!-- Cột trái: Form thêm hóa chất -->
+        <!-- Cột trái: Cố định làm Form Thêm Hóa Chất -->
         <div class="lg:col-span-4">
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
                 <div class="flex items-center gap-2 pb-4 mb-5 border-b border-slate-100">
@@ -98,7 +98,6 @@
                             class="w-full px-3.5 py-2 rounded-xl border border-red-100 bg-red-50/60 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:bg-white transition"></textarea>
                     </div>
 
-                    <!-- Ô nhập Link Video Hướng dẫn -->
                     <div class="pt-1">
                         <label class="flex items-center justify-between text-[11px] font-bold text-[#0b5c2c] uppercase mb-1">
                             <span><i class="fa-solid fa-circle-play mr-1"></i> VIDEO HƯỚNG DẪN SỬ DỤNG</span>
@@ -157,6 +156,105 @@
         </div>
     </main>
 
+    <!-- POPUP CHỈNH SỬA HÓA CHẤT -->
+    <div id="editModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-100 overflow-hidden max-h-[92vh] flex flex-col">
+            
+            <!-- Header Popup -->
+            <div class="bg-[#0b5c2c] text-white px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="bg-white/20 p-2 rounded-lg">
+                        <i class="fa-solid fa-pen-to-square text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-base uppercase tracking-wider">Chỉnh Sửa Thông Tin Hóa Chất</h3>
+                        <p id="editModalIdBadge" class="text-xs text-emerald-100 font-mono">Mã ID: #---</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeEditModal()" class="text-white/80 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Body Form Popup -->
+            <form id="editChemForm" class="p-6 overflow-y-auto space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">TÊN HÓA CHẤT *</label>
+                        <input type="text" id="edit_name" required
+                            class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">CÔNG THỨC *</label>
+                        <input type="text" id="edit_formula" required
+                            class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">SỐ CAS</label>
+                        <input type="text" id="edit_cas_number"
+                            class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">NHÀ SẢN XUẤT</label>
+                        <input type="text" id="edit_manufacturer"
+                            class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">MỨC ĐỘ AN TOÀN</label>
+                        <select id="edit_safety"
+                            class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
+                            <option value="Nguy hiểm">🔴 Nguy hiểm</option>
+                            <option value="Cảnh báo">🟡 Cảnh báo</option>
+                            <option value="An toàn">🟢 An toàn</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ĐIỀU KIỆN & CÁCH BẢO QUẢN</label>
+                    <input type="text" id="edit_storage"
+                        class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ĐẶC TÍNH VẬT LÝ/HÓA HỌC</label>
+                        <textarea id="edit_properties" rows="3"
+                            class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">SƠ CỨU KHẨN CẤP</label>
+                        <textarea id="edit_firstaid" rows="3"
+                            class="w-full px-3.5 py-2 rounded-xl border border-red-100 bg-red-50/60 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:bg-white transition"></textarea>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="flex items-center justify-between text-[11px] font-bold text-[#0b5c2c] uppercase mb-1">
+                        <span><i class="fa-solid fa-circle-play mr-1"></i> LINK VIDEO HƯỚNG DẪN (YOUTUBE, FACEBOOK, GOOGLE DRIVE)</span>
+                    </label>
+                    <input type="url" id="edit_video_url" placeholder="Dán link YouTube, Facebook hoặc Google Drive..."
+                        class="w-full px-3.5 py-2 rounded-xl border border-emerald-200 bg-emerald-50/40 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
+                </div>
+
+                <!-- Footer Nút bấm -->
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="closeEditModal()"
+                        class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition">
+                        Hủy
+                    </button>
+                    <button type="submit" id="saveEditBtn"
+                        class="px-6 py-2.5 rounded-xl bg-[#109c48] hover:bg-[#0d823b] text-white font-semibold text-sm shadow-sm transition flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Modal hiển thị QR Code -->
     <div id="qrModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl max-w-sm w-full p-6 text-center shadow-xl relative">
@@ -187,6 +285,8 @@
 
     <script>
         const API_URL = "https://hvlab.onrender.com/api/chemicals";
+        let allChemicals = [];
+        let editingId = null;
 
         function getSafetyBadge(safety) {
             if (!safety) return `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">Chưa rõ</span>`;
@@ -205,6 +305,7 @@
                 const res = await fetch(API_URL);
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
+                allChemicals = data;
 
                 if (data.length === 0) {
                     tbody.innerHTML = `
@@ -227,10 +328,14 @@
                             <div class="text-xs text-slate-400 font-mono">${chem.formula} ${chem.cas_number ? `• CAS: ${chem.cas_number}` : ''}</div>
                         </td>
                         <td class="py-3.5 px-3">${getSafetyBadge(chem.safety)}</td>
-                        <td class="py-3.5 px-3 text-right space-x-1.5">
+                        <td class="py-3.5 px-3 text-right space-x-1 whitespace-nowrap">
                             <button onclick="showQrModal('${chem.id}', '${chem.name.replace(/'/g, "\\'")}', '${chem.formula.replace(/'/g, "\\'")}')"
                                 class="px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition" title="Xem QR">
                                 <i class="fa-solid fa-qrcode"></i> QR
+                            </button>
+                            <button onclick="openEditModal('${chem.id}')"
+                                class="px-2.5 py-1.5 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 text-xs font-semibold transition" title="Chỉnh sửa hóa chất">
+                                <i class="fa-solid fa-pen-to-square"></i> Sửa
                             </button>
                             <a href="info.html?id=${chem.id}" target="_blank"
                                 class="inline-block px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs font-semibold transition" title="Xem chi tiết">
@@ -254,6 +359,86 @@
             }
         }
 
+        // Mở Popup Chỉnh sửa hóa chất
+        function openEditModal(id) {
+            const chem = allChemicals.find(c => c.id === id);
+            if (!chem) return;
+
+            editingId = id;
+            document.getElementById("editModalIdBadge").textContent = `Mã ID: #${id} (Giữ nguyên mã QR)`;
+
+            document.getElementById("edit_name").value = chem.name || "";
+            document.getElementById("edit_formula").value = chem.formula || "";
+            document.getElementById("edit_cas_number").value = (chem.cas_number && chem.cas_number !== "Không có") ? chem.cas_number : "";
+            document.getElementById("edit_manufacturer").value = (chem.manufacturer && chem.manufacturer !== "Không có") ? chem.manufacturer : "";
+            
+            if (chem.safety && chem.safety.includes("Cảnh báo")) {
+                document.getElementById("edit_safety").value = "Cảnh báo";
+            } else if (chem.safety && chem.safety.includes("An toàn")) {
+                document.getElementById("edit_safety").value = "An toàn";
+            } else {
+                document.getElementById("edit_safety").value = "Nguy hiểm";
+            }
+
+            document.getElementById("edit_storage").value = chem.storage || "";
+            document.getElementById("edit_properties").value = chem.properties || "";
+            document.getElementById("edit_firstaid").value = chem.firstaid || "";
+            document.getElementById("edit_video_url").value = chem.video_url || "";
+
+            const modal = document.getElementById("editModal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+
+        // Đóng Popup Chỉnh sửa
+        function closeEditModal() {
+            editingId = null;
+            const modal = document.getElementById("editModal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+
+        // Xử lý lưu trong Popup Chỉnh sửa (PUT)
+        document.getElementById("editChemForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            if (!editingId) return;
+
+            const btn = document.getElementById("saveEditBtn");
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...`;
+
+            const payload = {
+                name: document.getElementById("edit_name").value.trim(),
+                formula: document.getElementById("edit_formula").value.trim(),
+                cas_number: document.getElementById("edit_cas_number").value.trim() || "Không có",
+                manufacturer: document.getElementById("edit_manufacturer").value.trim() || "Không có",
+                safety: document.getElementById("edit_safety").value,
+                storage: document.getElementById("edit_storage").value.trim() || "Bảo quản nơi khô ráo, thoáng mát",
+                properties: document.getElementById("edit_properties").value.trim() || "Chưa cập nhật",
+                firstaid: document.getElementById("edit_firstaid").value.trim() || "Đưa đến cơ sở y tế gần nhất",
+                video_url: document.getElementById("edit_video_url").value.trim()
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/${editingId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) throw new Error("Cập nhật thất bại");
+
+                closeEditModal();
+                await renderTable();
+            } catch (err) {
+                alert("Lỗi khi cập nhật! Hãy kiểm tra xem main.py đã thêm hàm PUT chưa.");
+                console.error(err);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Lưu thay đổi`;
+            }
+        });
+
+        // Xử lý thêm hóa chất mới ở cột trái (POST)
         document.getElementById("chemForm").addEventListener("submit", async (e) => {
             e.preventDefault();
             const btn = document.getElementById("submitBtn");
