@@ -22,7 +22,7 @@
                 </div>
             </div>
             <div class="flex items-center space-x-3">
-                <span id="dbStatus" class="bg-emerald-500/90 text-white text-xs font-semibold px-3.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
+                <span class="bg-emerald-500/90 text-white text-xs font-semibold px-3.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
                     <i class="fa-solid fa-cloud-arrow-up"></i> Cloud Database
                 </span>
                 <div class="w-9 h-9 rounded-full bg-white text-[#0b5c2c] font-bold text-sm flex items-center justify-center shadow">
@@ -82,20 +82,35 @@
 
                     <div>
                         <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ĐIỀU KIỆN & CÁCH BẢO QUẢN</label>
-                        <input type="text" id="storage" placeholder="Nơi khô ráo, thoáng mát, tránh xa nguồn nhiệt..."
+                        <input type="text" id="storage" placeholder="Nơi khô ráo, thoáng mát, tránh xa các chất dễ cháy..."
                             class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
                     </div>
 
                     <div>
                         <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ĐẶC TÍNH VẬT LÝ/HÓA HỌC</label>
-                        <textarea id="properties" rows="2" placeholder="Chất lỏng sánh, không màu, hút ẩm mạnh..."
+                        <textarea id="properties" rows="2" placeholder="Chất lỏng sánh..."
                             class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"></textarea>
                     </div>
 
                     <div>
                         <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">SƠ CỨU KHẨN CẤP</label>
-                        <textarea id="firstaid" rows="2" placeholder="Rửa nước sạch liên tục ít nhất 15 phút..."
+                        <textarea id="firstaid" rows="2" placeholder="Rửa nước sạch liên tục..."
                             class="w-full px-3.5 py-2 rounded-xl border border-red-100 bg-red-50/60 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:bg-white transition"></textarea>
+                    </div>
+
+                    <!-- Ô nhập Link Video Hướng dẫn -->
+                    <div class="pt-1">
+                        <label class="flex items-center justify-between text-[11px] font-bold text-[#0b5c2c] uppercase mb-1">
+                            <span><i class="fa-solid fa-circle-play mr-1"></i> VIDEO HƯỚNG DẪN SỬ DỤNG</span>
+                            <span class="space-x-1.5 text-xs">
+                                <i class="fa-brands fa-youtube text-red-500" title="YouTube"></i>
+                                <i class="fa-brands fa-facebook text-blue-600" title="Facebook"></i>
+                                <i class="fa-brands fa-google-drive text-amber-500" title="Google Drive"></i>
+                            </span>
+                        </label>
+                        <input type="url" id="video_url" placeholder="Dán link YouTube, Facebook hoặc Google Drive..."
+                            class="w-full px-3.5 py-2 rounded-xl border border-emerald-200 bg-emerald-50/40 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
+                        <p class="text-[10px] text-slate-400 mt-1">Để trống nếu không có video hướng dẫn.</p>
                     </div>
 
                     <button type="submit" id="submitBtn"
@@ -205,7 +220,10 @@
                     <tr class="hover:bg-slate-50/80 transition">
                         <td class="py-3.5 px-3 font-mono text-xs font-bold text-slate-500">#${chem.id}</td>
                         <td class="py-3.5 px-3">
-                            <div class="font-bold text-slate-800">${chem.name}</div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-slate-800">${chem.name}</span>
+                                ${chem.video_url ? `<span class="px-2 py-0.5 rounded-md bg-emerald-100 text-[#0b5c2c] text-[10px] font-bold flex items-center gap-1"><i class="fa-solid fa-play"></i> Video</span>` : ''}
+                            </div>
                             <div class="text-xs text-slate-400 font-mono">${chem.formula} ${chem.cas_number ? `• CAS: ${chem.cas_number}` : ''}</div>
                         </td>
                         <td class="py-3.5 px-3">${getSafetyBadge(chem.safety)}</td>
@@ -230,8 +248,7 @@
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="4" class="text-center py-10 text-red-500 text-sm">
-                            <i class="fa-solid fa-triangle-exclamation mr-1"></i> Không thể kết nối tới API (${API_URL}).<br>
-                            <span class="text-xs text-slate-400">Hãy kiểm tra xem Render Backend đã chạy xong chưa hoặc MongoDB đã mở IP 0.0.0.0/0 chưa.</span>
+                            <i class="fa-solid fa-triangle-exclamation mr-1"></i> Không thể kết nối tới API (${API_URL}).
                         </td>
                     </tr>`;
             }
@@ -251,7 +268,8 @@
                 safety: document.getElementById("safety").value,
                 storage: document.getElementById("storage").value.trim() || "Bảo quản nơi khô ráo, thoáng mát",
                 properties: document.getElementById("properties").value.trim() || "Chưa cập nhật",
-                firstaid: document.getElementById("firstaid").value.trim() || "Đưa đến cơ sở y tế gần nhất"
+                firstaid: document.getElementById("firstaid").value.trim() || "Đưa đến cơ sở y tế gần nhất",
+                video_url: document.getElementById("video_url").value.trim()
             };
 
             try {
