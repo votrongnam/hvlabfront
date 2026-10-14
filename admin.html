@@ -6,6 +6,29 @@
     <title>THCS Hùng Vương - Hệ thống Quản trị Hóa chất</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Animation mượt cho Popup (Spring Pop-in & Fade-out) */
+        .modal-backdrop {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+        }
+        .modal-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        .modal-card {
+            transform: scale(0.92) translateY(16px);
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+        }
+        .modal-backdrop.active .modal-card {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+    </style>
 </head>
 <body class="bg-slate-50 min-h-screen font-sans text-slate-800">
 
@@ -35,7 +58,7 @@
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        <!-- Cột trái: Cố định làm Form Thêm Hóa Chất -->
+        <!-- Cột trái: Form Thêm Hóa Chất -->
         <div class="lg:col-span-4">
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
                 <div class="flex items-center gap-2 pb-4 mb-5 border-b border-slate-100">
@@ -156,9 +179,9 @@
         </div>
     </main>
 
-    <!-- POPUP CHỈNH SỬA HÓA CHẤT -->
-    <div id="editModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-100 overflow-hidden max-h-[92vh] flex flex-col">
+    <!-- POPUP CHỈNH SỬA HÓA CHẤT (Có Animation) -->
+    <div id="editModal" onclick="if(event.target === this) closeEditModal()" class="modal-backdrop fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] flex items-center justify-center z-50 p-4">
+        <div class="modal-card bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-100 overflow-hidden max-h-[92vh] flex flex-col">
             
             <!-- Header Popup -->
             <div class="bg-[#0b5c2c] text-white px-6 py-4 flex items-center justify-between">
@@ -171,8 +194,8 @@
                         <p id="editModalIdBadge" class="text-xs text-emerald-100 font-mono">Mã ID: #---</p>
                     </div>
                 </div>
-                <button type="button" onclick="closeEditModal()" class="text-white/80 hover:text-white transition">
-                    <i class="fa-solid fa-xmark text-xl"></i>
+                <button type="button" onclick="closeEditModal()" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
 
@@ -255,9 +278,9 @@
         </div>
     </div>
 
-    <!-- Modal hiển thị QR Code -->
-    <div id="qrModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-6 text-center shadow-xl relative">
+    <!-- Modal hiển thị QR Code (Có Animation đồng bộ) -->
+    <div id="qrModal" onclick="if(event.target === this) closeQrModal()" class="modal-backdrop fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] flex items-center justify-center z-50 p-4">
+        <div class="modal-card bg-white rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
             <button onclick="closeQrModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
                 <i class="fa-solid fa-xmark text-xl"></i>
             </button>
@@ -359,7 +382,7 @@
             }
         }
 
-        // Mở Popup Chỉnh sửa hóa chất
+        // Mở Popup Chỉnh sửa với hiệu ứng mượt
         function openEditModal(id) {
             const chem = allChemicals.find(c => c.id === id);
             if (!chem) return;
@@ -385,17 +408,13 @@
             document.getElementById("edit_firstaid").value = chem.firstaid || "";
             document.getElementById("edit_video_url").value = chem.video_url || "";
 
-            const modal = document.getElementById("editModal");
-            modal.classList.remove("hidden");
-            modal.classList.add("flex");
+            document.getElementById("editModal").classList.add("active");
         }
 
-        // Đóng Popup Chỉnh sửa
+        // Đóng Popup Chỉnh sửa với hiệu ứng thu nhỏ
         function closeEditModal() {
             editingId = null;
-            const modal = document.getElementById("editModal");
-            modal.classList.add("hidden");
-            modal.classList.remove("flex");
+            document.getElementById("editModal").classList.remove("active");
         }
 
         // Xử lý lưu trong Popup Chỉnh sửa (PUT)
@@ -496,16 +515,20 @@
             document.getElementById("qrImage").src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(infoUrl)}`;
             document.getElementById("openInfoLink").href = `info.html?id=${id}`;
             
-            const modal = document.getElementById("qrModal");
-            modal.classList.remove("hidden");
-            modal.classList.add("flex");
+            document.getElementById("qrModal").classList.add("active");
         }
 
         function closeQrModal() {
-            const modal = document.getElementById("qrModal");
-            modal.classList.add("hidden");
-            modal.classList.remove("flex");
+            document.getElementById("qrModal").classList.remove("active");
         }
+
+        // Hỗ trợ nhấn phím ESC để đóng mượt cả 2 Popup
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                closeEditModal();
+                closeQrModal();
+            }
+        });
 
         renderTable();
     </script>
