@@ -3,24 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thông tin Hóa chất - THCS Hùng Vương</title>
+    <title>Thông tin Hóa chất & Tương tác AI - THCS Hùng Vương</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Hiệu ứng đóng/mở mượt cho Popup Loading chính */
+        .loading-backdrop {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.32s ease, visibility 0.32s ease;
+        }
+        .loading-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        .loading-card {
+            transform: scale(0.88) translateY(20px);
+            opacity: 0;
+            transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.32s ease;
+        }
+        .loading-backdrop.active .loading-card {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        /* Vòng xoay kép & bọt khí phòng Lab */
+        @keyframes orbitClockwise {
+            to { transform: rotate(360deg); }
+        }
+        @keyframes orbitCounter {
+            to { transform: rotate(-360deg); }
+        }
+        @keyframes flaskFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-4px) rotate(4deg); }
+        }
+        @keyframes bubbleRise {
+            0% { transform: translateY(6px) scale(0.6); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-14px) scale(1.1); opacity: 0; }
+        }
+        @keyframes shimmerSlide {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(220%); }
+        }
+        @keyframes contentFadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulseRing {
+            0% { transform: scale(0.85); opacity: 0.7; }
+            100% { transform: scale(1.55); opacity: 0; }
+        }
+
+        .ring-cw {
+            animation: orbitClockwise 1.8s linear infinite;
+        }
+        .ring-ccw {
+            animation: orbitCounter 1.3s linear infinite;
+        }
+        .flask-anim {
+            animation: flaskFloat 2s ease-in-out infinite;
+        }
+        .bubble-1 {
+            animation: bubbleRise 1.4s ease-in infinite;
+        }
+        .bubble-2 {
+            animation: bubbleRise 1.4s ease-in 0.45s infinite;
+        }
+        .bubble-3 {
+            animation: bubbleRise 1.4s ease-in 0.9s infinite;
+        }
+        .progress-shimmer::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            width: 55%;
+            background: linear-gradient(90deg, transparent, #10b981, #0b5c2c, transparent);
+            animation: shimmerSlide 1.25s ease-in-out infinite;
+        }
+        .ai-pulse-ring::before {
+            content: "";
+            position: absolute;
+            inset: -6px;
+            border-radius: 9999px;
+            border: 2px solid #10b981;
+            animation: pulseRing 1.5s cubic-bezier(0.2, 0.8, 0.4, 1) infinite;
+        }
+        .fade-up-enter {
+            animation: contentFadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col font-sans text-slate-800">
 
-    <!-- Popup Loading đơn giản khi quét QR hoặc tìm kiếm -->
-    <div id="loadingPopup" class="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center z-50 p-4 transition-opacity">
-        <div class="bg-white rounded-2xl shadow-xl border border-slate-100 px-7 py-6 flex flex-col items-center text-center max-w-xs w-full">
-            <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
-                <i class="fa-solid fa-spinner fa-spin text-2xl"></i>
+    <!-- POPUP LOADING PHÒNG LAB (HIỆU ỨNG MƯỢT KHI QUÉT QR / TÌM KIẾM) -->
+    <div id="loadingPopup" class="loading-backdrop active fixed inset-0 bg-slate-900/45 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="loading-card bg-white rounded-3xl shadow-2xl border border-emerald-100 px-8 py-7 flex flex-col items-center text-center max-w-xs w-full relative overflow-hidden">
+            <!-- Ánh sáng trang trí nền -->
+            <div class="absolute -top-10 -right-10 w-28 h-28 bg-emerald-100/60 rounded-full blur-2xl pointer-events-none"></div>
+            <div class="absolute -bottom-10 -left-10 w-28 h-28 bg-emerald-50 rounded-full blur-2xl pointer-events-none"></div>
+
+            <!-- Vòng xoay kép + Bình thí nghiệm sủi bọt -->
+            <div class="relative w-24 h-24 flex items-center justify-center mb-4">
+                <div class="absolute inset-0 rounded-full border-[3.5px] border-emerald-100 border-t-[#0b5c2c] border-r-emerald-500 ring-cw"></div>
+                <div class="absolute inset-3 rounded-full border-[2.5px] border-emerald-50 border-b-emerald-500 border-l-[#0b5c2c] ring-ccw"></div>
+                
+                <div class="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100/80 text-[#0b5c2c] flex items-center justify-center shadow-inner">
+                    <i class="fa-solid fa-flask text-2xl flask-anim"></i>
+                    <!-- Bọt khí hóa học bay lên -->
+                    <span class="absolute top-1.5 left-3.5 w-1.5 h-1.5 rounded-full bg-emerald-500 bubble-1"></span>
+                    <span class="absolute top-2 right-3.5 w-2 h-2 rounded-full bg-[#0b5c2c] bubble-2"></span>
+                    <span class="absolute top-1 left-5 w-1.5 h-1.5 rounded-full bg-emerald-400 bubble-3"></span>
+                </div>
             </div>
-            <h3 class="font-bold text-slate-800 text-base">Đang tải dữ liệu...</h3>
-            <p id="loadingPopupText" class="text-xs text-slate-400 mt-1">Vui lòng chờ trong giây lát</p>
+
+            <span class="px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-emerald-50 text-[#0b5c2c] border border-emerald-200 mb-2">
+                THCS Hùng Vương Lab
+            </span>
+            <h3 class="font-extrabold text-slate-800 text-base">Đang phân tích mã QR...</h3>
+            <p id="loadingPopupText" class="text-xs text-slate-500 mt-1">Đang tải hồ sơ an toàn hóa chất</p>
+
+            <!-- Thanh Shimmer chạy mượt -->
+            <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden relative mt-5 progress-shimmer"></div>
         </div>
     </div>
 
-    <!-- Header Full Screen (Không có nút Quản trị) -->
+    <!-- Header Full Screen -->
     <header class="bg-[#0b5c2c] text-white shadow-md w-full">
         <div class="w-full px-6 md:px-10 py-4 flex items-center justify-between">
             <div class="flex items-center space-x-3">
@@ -38,8 +149,8 @@
     <!-- Main Container Full Screen -->
     <main class="flex-1 w-full px-4 sm:px-8 md:px-12 py-6 flex flex-col">
 
-        <!-- Trạng thái lỗi (Khi mã QR không hợp lệ -> Hiện thanh tìm kiếm theo Tên, Công thức hoặc ID) -->
-        <div id="errorBox" class="hidden flex-1 w-full bg-white rounded-2xl shadow-sm border border-red-100 p-8 flex flex-col items-center justify-center text-center">
+        <!-- Trạng thái lỗi (Khi mã QR không hợp lệ -> Hiện thanh tìm kiếm) -->
+        <div id="errorBox" class="hidden flex-1 w-full bg-white rounded-2xl shadow-sm border border-red-100 p-8 flex flex-col items-center justify-center text-center fade-up-enter">
             <div class="w-16 h-16 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-4">
                 <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
             </div>
@@ -48,7 +159,7 @@
             
             <div class="flex w-full max-w-lg mx-auto gap-2.5">
                 <input type="text" id="manualSearchInput"
-                    placeholder="Nhập tên, công thức (VD: H2SO4) hoặc mã ID..."
+                    placeholder="Nhập tên, công thức (VD: HCl, H2SO4) hoặc mã ID..."
                     onkeydown="if(event.key === 'Enter') searchChemical()"
                     class="flex-1 px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 <button onclick="searchChemical()"
@@ -57,15 +168,14 @@
                 </button>
             </div>
 
-            <!-- Danh sách gợi ý nếu gõ từ khóa có nhiều hóa chất trùng -->
             <div id="multiMatchBox" class="hidden w-full max-w-lg mx-auto mt-6 text-left">
                 <p class="text-xs font-bold text-slate-400 uppercase mb-2">Chọn hóa chất phù hợp:</p>
                 <div id="multiMatchList" class="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50"></div>
             </div>
         </div>
 
-        <!-- Nội dung chi tiết hóa chất khi quét QR hợp lệ (Full Screen) -->
-        <div id="chemContent" class="hidden flex-1 w-full flex flex-col gap-6">
+        <!-- Nội dung chi tiết hóa chất khi quét QR hợp lệ -->
+        <div id="chemContent" class="hidden flex-1 w-full flex flex-col gap-6 fade-up-enter">
             
             <!-- Thẻ tiêu đề hóa chất -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8">
@@ -93,20 +203,20 @@
                 </div>
             </div>
 
-            <!-- Đặc tính & Bảo quản & Sơ cứu chia 3 cột -->
+            <!-- 3 CỘT CHUẨN YÊU CẦU CÔ GIÁO: ĐẶC TÍNH VẬT LÝ/HÓA HỌC - CẢNH BÁO - HƯỚNG DẪN SƠ CỨU KHẨN CẤP -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 flex flex-col">
-                    <h3 class="text-xs md:text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2 mb-3">
+                    <h3 class="text-xs md:text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2 mb-3">
                         <i class="fa-solid fa-atom text-emerald-600 text-base"></i> ĐẶC TÍNH VẬT LÝ / HÓA HỌC
                     </h3>
                     <p id="chemProperties" class="text-base text-slate-700 leading-relaxed whitespace-pre-line flex-1">---</p>
                 </div>
 
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 flex flex-col">
-                    <h3 class="text-xs md:text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2 mb-3">
-                        <i class="fa-solid fa-box-archive text-amber-600 text-base"></i> ĐIỀU KIỆN & CÁCH BẢO QUẢN
+                <div class="bg-amber-50/70 rounded-2xl shadow-sm border border-amber-200 p-6 md:p-8 flex flex-col">
+                    <h3 class="text-xs md:text-sm font-bold text-amber-700 uppercase tracking-wider flex items-center gap-2 mb-3">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-600 text-base"></i> CẢNH BÁO
                     </h3>
-                    <p id="chemStorage" class="text-base text-slate-700 leading-relaxed whitespace-pre-line flex-1">---</p>
+                    <p id="chemWarning" class="text-base text-amber-950 font-medium leading-relaxed whitespace-pre-line flex-1">---</p>
                 </div>
 
                 <div class="bg-red-50/80 rounded-2xl shadow-sm border border-red-200 p-6 md:p-8 flex flex-col">
@@ -119,7 +229,6 @@
 
             <!-- KHUNG VIDEO CUSTOM ĐỒNG BỘ TÔNG MÀU CHỦ ĐẠO (#0b5c2c) -->
             <div id="videoSection" class="hidden bg-white rounded-2xl shadow-md border-2 border-[#0b5c2c]/20 overflow-hidden">
-                <!-- Thanh tiêu đề Custom của khung Video -->
                 <div class="bg-gradient-to-r from-[#0b5c2c] to-emerald-700 text-white px-5 py-3.5 flex flex-wrap items-center justify-between gap-3">
                     <div class="flex items-center gap-3">
                         <div class="flex items-center gap-1.5">
@@ -141,10 +250,82 @@
                     </a>
                 </div>
 
-                <!-- Viền đệm xanh ngọc bao quanh màn hình phát 16:9 -->
                 <div class="p-3 sm:p-5 bg-gradient-to-b from-emerald-950/5 to-slate-100/70">
-                    <div class="max-w-4xl mx-auto rounded-xl overflow-hidden shadow-lg border-2 border-[#0b5c2c]/30 bg-slate-950 aspect-video relative" id="videoFrameWrapper">
-                        <!-- Iframe hoặc thẻ Video được chèn tự động vào đây -->
+                    <div class="max-w-4xl mx-auto rounded-xl overflow-hidden shadow-lg border-2 border-[#0b5c2c]/30 bg-slate-950 aspect-video relative" id="videoFrameWrapper"></div>
+                </div>
+            </div>
+
+            <!-- MỤC CÂU HỎI TƯƠNG TÁC VỚI AI (BỘ 5 CÂU HỎI TỪ RENDER AI) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+                <div class="flex flex-wrap items-start justify-between gap-4 mb-5">
+                    <div>
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-8 h-8 rounded-lg bg-[#0b5c2c] text-white flex items-center justify-center text-sm">
+                                <i class="fa-solid fa-robot"></i>
+                            </span>
+                            <h3 class="text-lg md:text-xl font-extrabold text-slate-800">Câu hỏi tương tác với AI</h3>
+                            <span id="aiEngineBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-[#0b5c2c] border border-emerald-200">
+                                ⚡ Render AI
+                            </span>
+                        </div>
+                        <p class="text-sm text-slate-600 mt-2">
+                            AI có thể đưa ra các tình huống đối với <strong id="aiChemLabel" class="text-[#0b5c2c]">hóa chất này</strong> để học sinh lựa chọn câu trả lời, sau đó giải thích vì sao hành động đó an toàn hoặc không an toàn.
+                        </p>
+                    </div>
+
+                    <button id="regenAiBtn" onclick="fetchAIQuizFromRender(true)"
+                        class="px-4 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-[#0b5c2c] border border-emerald-200 text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> AI Tạo tình huống mới
+                    </button>
+                </div>
+
+                <!-- Khung bài luyện tập mô phỏng (5 câu) -->
+                <div class="rounded-2xl border border-slate-200 bg-slate-50/40 p-5 md:p-6">
+                    <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-5 border-b border-slate-200/80">
+                        <p class="text-xs md:text-sm font-medium text-slate-500">
+                            Bài luyện tập mô phỏng (5 câu) · Chọn một đáp án cho mỗi câu.
+                        </p>
+                        <span id="aiScoreBadge" class="text-xs font-bold text-[#0b5c2c] bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                            Đã trả lời: 0/5 câu
+                        </span>
+                    </div>
+
+                    <!-- HIỆU ỨNG LOADING KHI AI TRÊN RENDER ĐANG BIÊN SOẠN 5 CÂU HỎI -->
+                    <div id="aiQuizLoading" class="hidden py-10 flex flex-col items-center justify-center text-center">
+                        <div class="relative w-16 h-16 flex items-center justify-center mb-4">
+                            <div class="absolute inset-0 rounded-full border-[3px] border-emerald-100 border-t-[#0b5c2c] ring-cw"></div>
+                            <div class="w-11 h-11 rounded-full bg-emerald-50 text-[#0b5c2c] flex items-center justify-center relative ai-pulse-ring">
+                                <i class="fa-solid fa-robot text-lg"></i>
+                            </div>
+                        </div>
+                        <p class="text-sm font-extrabold text-slate-800">AI đang biên soạn 5 tình huống an toàn...</p>
+                        <p class="text-xs text-slate-400 mt-1">Đang tổng hợp dữ liệu Cảnh báo & Sơ cứu từ Render</p>
+                        <div class="w-48 h-1.5 bg-slate-200/70 rounded-full overflow-hidden relative mt-4 progress-shimmer"></div>
+
+                        <!-- Khung Skeleton mô phỏng câu hỏi đang được tạo -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full mt-6 text-left opacity-60">
+                            <div class="bg-white p-4 rounded-xl border border-slate-200/80 space-y-2.5 animate-pulse">
+                                <div class="h-3.5 bg-slate-200 rounded w-3/4"></div>
+                                <div class="h-8 bg-slate-100 rounded-lg w-full"></div>
+                                <div class="h-8 bg-slate-100 rounded-lg w-5/6"></div>
+                            </div>
+                            <div class="bg-white p-4 rounded-xl border border-slate-200/80 space-y-2.5 animate-pulse hidden lg:block">
+                                <div class="h-3.5 bg-slate-200 rounded w-2/3"></div>
+                                <div class="h-8 bg-slate-100 rounded-lg w-full"></div>
+                                <div class="h-8 bg-slate-100 rounded-lg w-4/5"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Danh sách 5 câu hỏi chia 2 cột -->
+                    <div id="aiQuestionsGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
+
+                    <!-- Nút Làm lại bài tập -->
+                    <div class="mt-6 pt-5 border-t border-slate-200/80 flex justify-center">
+                        <button onclick="resetCurrentAIQuiz()"
+                            class="w-full sm:w-auto min-w-[240px] py-2.5 px-6 rounded-full border border-slate-300 bg-white hover:bg-slate-100 text-slate-800 font-bold text-sm transition shadow-sm flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-rotate-left text-xs"></i> Làm lại bài tập
+                        </button>
                     </div>
                 </div>
             </div>
@@ -153,20 +334,23 @@
     </main>
 
     <script>
-        const API_URL = "https://hvlab.onrender.com/api/chemicals";
-        let allChemicalsCache = [];
+        const BASE_URL = "https://hvlab.onrender.com";
+        const API_URL = `${BASE_URL}/api/chemicals`;
+        const AI_QUIZ_URL = `${BASE_URL}/api/ai-quiz`;
 
-        function showLoadingPopup(message = "Đang tra cứu thông tin hóa chất...") {
+        let allChemicalsCache = [];
+        let currentChem = null;
+        let activeQuestions = [];
+        let answeredState = {};
+        let variationCounter = 1;
+
+        function showLoadingPopup(message = "Đang tải hồ sơ an toàn hóa chất...") {
             document.getElementById("loadingPopupText").textContent = message;
-            const popup = document.getElementById("loadingPopup");
-            popup.classList.remove("hidden");
-            popup.classList.add("flex");
+            document.getElementById("loadingPopup").classList.add("active");
         }
 
         function hideLoadingPopup() {
-            const popup = document.getElementById("loadingPopup");
-            popup.classList.add("hidden");
-            popup.classList.remove("flex");
+            document.getElementById("loadingPopup").classList.remove("active");
         }
 
         function normalizeStr(str) {
@@ -185,12 +369,10 @@
             return `<span class="px-4 py-2 rounded-full text-sm font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">🟢 An toàn (Safe)</span>`;
         }
 
-        // Tự động nhận diện và chuyển đổi link YouTube, Google Drive, Facebook sang chuẩn nhúng
         function buildCustomVideoEmbed(rawUrl) {
             const url = (rawUrl || "").trim();
             if (!url) return null;
 
-            // 1. YouTube (watch?v=, youtu.be/, shorts/, embed/)
             const ytRegex = /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
             const ytMatch = url.match(ytRegex);
             if (ytMatch && ytMatch[1]) {
@@ -201,7 +383,6 @@
                 };
             }
 
-            // 2. Google Drive (/file/d/ID/view hoặc ?id=ID)
             const driveRegex = /drive\.google\.com\/(?:file\/d\/|open\?id=)([a-zA-Z0-9_-]+)/;
             const driveMatch = url.match(driveRegex);
             if (driveMatch && driveMatch[1]) {
@@ -212,7 +393,6 @@
                 };
             }
 
-            // 3. Facebook Video (facebook.com/.../videos/... hoặc fb.watch/...)
             if (url.includes("facebook.com") || url.includes("fb.watch")) {
                 return {
                     platform: '<i class="fa-brands fa-facebook text-blue-300 mr-1"></i> Facebook Video',
@@ -221,7 +401,6 @@
                 };
             }
 
-            // 4. File video trực tiếp (.mp4, .webm, .ogg)
             if (/\.(mp4|webm|ogg)(\?.*)?$/i.test(url)) {
                 return {
                     platform: '<i class="fa-solid fa-film text-emerald-200 mr-1"></i> Trình phát trực tiếp',
@@ -230,7 +409,6 @@
                 };
             }
 
-            // 5. Link nhúng khác
             return {
                 platform: '<i class="fa-solid fa-circle-play text-emerald-200 mr-1"></i> Video hướng dẫn',
                 type: 'iframe',
@@ -272,18 +450,206 @@
             section.classList.remove("hidden");
         }
 
+        // --- GỌI TRỰC TIẾP API AI TRÊN RENDER ĐỂ RENDER BỘ 5 CÂU HỎI ---
+        async function fetchAIQuizFromRender(isNewVariation = false) {
+            if (!currentChem) return;
+            if (isNewVariation) variationCounter++;
+
+            const loadingEl = document.getElementById("aiQuizLoading");
+            const gridEl = document.getElementById("aiQuestionsGrid");
+            const regenBtn = document.getElementById("regenAiBtn");
+            const engineBadge = document.getElementById("aiEngineBadge");
+
+            const chemDisplay = currentChem.formula ? `${currentChem.name} (${currentChem.formula})` : currentChem.name;
+            document.getElementById("aiChemLabel").textContent = chemDisplay;
+
+            loadingEl.classList.remove("hidden");
+            gridEl.classList.add("hidden");
+            regenBtn.disabled = true;
+
+            try {
+                const res = await fetch(AI_QUIZ_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        name: currentChem.name || "",
+                        formula: currentChem.formula || "",
+                        safety: currentChem.safety || "",
+                        properties: currentChem.properties || "",
+                        warning: currentChem.storage || "",
+                        firstaid: currentChem.firstaid || "",
+                        variation_seed: variationCounter
+                    })
+                });
+
+                if (!res.ok) throw new Error("API AI chưa phản hồi");
+                const data = await res.json();
+                activeQuestions = (data.questions && data.questions.length >= 5)
+                    ? data.questions.slice(0, 5)
+                    : buildClientFallbackQuestions(currentChem);
+                engineBadge.textContent = `⚡ ${data.source || "Render AI"}`;
+            } catch (err) {
+                console.warn("Sử dụng bộ 5 câu hỏi dự phòng do lỗi mạng:", err);
+                activeQuestions = buildClientFallbackQuestions(currentChem);
+                engineBadge.textContent = "⚡ AI Safe-Mode";
+            } finally {
+                loadingEl.classList.add("hidden");
+                gridEl.classList.remove("hidden");
+                regenBtn.disabled = false;
+                renderQuestionsToDOM();
+            }
+        }
+
+        // Bộ 5 câu hỏi dự phòng phía trình duyệt
+        function buildClientFallbackQuestions(chem) {
+            const short = chem.formula || chem.name;
+            const warningText = chem.storage || "hóa chất có nguy cơ gây bỏng hoặc kích ứng";
+            const firstAidText = chem.firstaid || "rửa ngay dưới vòi nước sạch liên tục và báo cho giáo viên";
+            return [
+                {
+                    id: 1,
+                    question: `1. Một bạn đề nghị mở chai ${short} để ngửi thử. Em sẽ làm gì?`,
+                    options: [
+                        { text: "Đồng ý vì chỉ ngửi một chút", isSafe: false, explanation: `Không an toàn! Cảnh báo của ${short}: ${warningText}. Tuyệt đối không đưa mũi ngửi trực tiếp.` },
+                        { text: "Không mở chai và báo giáo viên", isSafe: true, explanation: `An toàn! Ngăn bạn lại và báo giáo viên giúp phòng tránh nguy cơ hít phải hơi hóa chất ${short} độc hại.` },
+                        { text: "Đứng gần để quan sát", isSafe: false, explanation: `Không an toàn! Đứng gần khi mở chai ${short} sai quy cách rất dễ bị hít phải hơi độc hoặc văng hóa chất.` }
+                    ]
+                },
+                {
+                    id: 2,
+                    question: `2. ${short} bắn vào mắt bạn cùng nhóm. Hành động ưu tiên là gì?`,
+                    options: [
+                        { text: "Tìm khăn giấy lau mắt", isSafe: false, explanation: `Không an toàn! Dùng khăn giấy lau sẽ làm hóa chất ${short} chà xát gây tổn thương giác mạc nặng hơn.` },
+                        { text: "Chờ giáo viên đến rồi mới rửa", isSafe: false, explanation: "Không an toàn! Chờ đợi khiến hóa chất ăn sâu vào mắt, cần rửa nước sạch ngay lập tức." },
+                        { text: "Báo động, rửa mắt ngay bằng nước sạch liên tục và gọi trợ giúp", isSafe: true, explanation: `An toàn! Đúng theo hướng dẫn sơ cứu: ${firstAidText}.` }
+                    ]
+                },
+                {
+                    id: 3,
+                    question: `3. Em phát hiện ${short} bị đổ trên bàn. Em nên làm gì?`,
+                    options: [
+                        { text: "Dùng khăn khô lau", isSafe: false, explanation: `Không an toàn! Hóa chất ${short} có thể thấm qua khăn gây bỏng da hoặc phản ứng nguy hiểm.` },
+                        { text: "Tự rắc chất trung hòa", isSafe: false, explanation: "Không an toàn! Tự ý rắc hóa chất khác khi chưa có chỉ dẫn của giáo viên có thể gây phản ứng tỏa nhiệt hoặc bắn tóe." },
+                        { text: "Tránh xa khu vực và báo giáo viên", isSafe: true, explanation: `An toàn! Cần cảnh báo các bạn lùi ra xa và báo giáo viên xử lý bằng dụng cụ chuyên dụng.` }
+                    ]
+                },
+                {
+                    id: 4,
+                    question: `4. Chai ${short} bị mất nhãn. Em có thể dùng thử một ít để nhận biết không?`,
+                    options: [
+                        { text: "Không, cần ngừng sử dụng và báo giáo viên", isSafe: true, explanation: "An toàn! Tuyệt đối không dùng hóa chất mất nhãn để tránh nhầm lẫn gây cháy nổ hoặc tai nạn." },
+                        { text: "Có, nếu dùng lượng nhỏ", isSafe: false, explanation: "Không an toàn! Dù lượng nhỏ vẫn có thể gây phản ứng nổ hoặc sinh khí độc nếu nhầm hóa chất." },
+                        { text: "Có, nếu đeo găng tay", isSafe: false, explanation: "Không an toàn! Đeo găng tay không ngăn được nguy cơ nổ hoặc khí độc thoát ra từ hóa chất mất nhãn." }
+                    ]
+                },
+                {
+                    id: 5,
+                    question: `5. Sau khi làm thí nghiệm xong, lượng ${short} còn dư nên xử lý như thế nào?`,
+                    options: [
+                        { text: "Đổ ngược trở lại vào chai hóa chất gốc", isSafe: false, explanation: `Không an toàn! Đổ hóa chất thừa vào chai gốc sẽ làm hỏng hoặc nhiễm bẩn cả chai ${short} tinh khiết.` },
+                        { text: "Đổ thẳng xuống bồn rửa tay rồi xả nước", isSafe: false, explanation: `Không an toàn! Đổ trực tiếp ${short} xuống cống có thể làm hỏng đường ống và gây ô nhiễm môi trường.` },
+                        { text: "Thu gom vào bình chứa chất thải theo hướng dẫn của giáo viên", isSafe: true, explanation: `An toàn! Hóa chất thừa cần được thu gom đúng nơi quy định để xử lý an toàn.` }
+                    ]
+                }
+            ];
+        }
+
+        function renderQuestionsToDOM() {
+            answeredState = {};
+            updateScoreBadge(activeQuestions.length);
+
+            const grid = document.getElementById("aiQuestionsGrid");
+            grid.innerHTML = activeQuestions.map((q, qIdx) => {
+                const qId = q.id || (qIdx + 1);
+                return `
+                    <div class="bg-white rounded-xl border border-slate-200 p-5 flex flex-col justify-between shadow-sm fade-up-enter" style="animation-delay: ${qIdx * 60}ms">
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm md:text-base mb-4 leading-snug">
+                                ${q.question}
+                            </p>
+                            <div class="space-y-2.5">
+                                ${(q.options || []).map((opt, optIdx) => `
+                                    <label id="label_q${qId}_opt${optIdx}"
+                                        class="flex items-start gap-3 p-3 rounded-xl border border-slate-200/80 hover:bg-slate-50 cursor-pointer transition">
+                                        <input type="radio" name="ai_q_${qId}"
+                                            onchange="selectAIAnswer(${qIdx},${optIdx})"
+                                            class="mt-1 w-4 h-4 text-[#0b5c2c] focus:ring-[#0b5c2c]">
+                                        <span class="text-sm text-slate-700 leading-relaxed">${opt.text}</span>
+                                    </label>
+                                `).join("")}
+                            </div>
+                        </div>
+
+                        <!-- Khung AI Giải thích hiện ra ngay khi học sinh chọn đáp án -->
+                        <div id="explain_q_${qId}" class="hidden mt-4 p-3.5 rounded-xl text-xs md:text-sm leading-relaxed border"></div>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        function selectAIAnswer(qIdx, optIdx) {
+            const questionObj = activeQuestions[qIdx];
+            if (!questionObj) return;
+            const qId = questionObj.id || (qIdx + 1);
+            const selectedOpt = questionObj.options[optIdx];
+
+            answeredState[qId] = Boolean(selectedOpt.isSafe);
+            updateScoreBadge(activeQuestions.length);
+
+            questionObj.options.forEach((_, idx) => {
+                const lbl = document.getElementById(`label_q${qId}_opt${idx}`);
+                if (lbl) {
+                    lbl.className = "flex items-start gap-3 p-3 rounded-xl border border-slate-200/80 hover:bg-slate-50 cursor-pointer transition";
+                }
+            });
+
+            const activeLabel = document.getElementById(`label_q${qId}_opt${optIdx}`);
+            const explainBox = document.getElementById(`explain_q_${qId}`);
+            explainBox.classList.remove("hidden");
+
+            if (selectedOpt.isSafe) {
+                activeLabel.className = "flex items-start gap-3 p-3 rounded-xl border-2 border-emerald-500 bg-emerald-50/50 cursor-pointer transition";
+                explainBox.className = "mt-4 p-3.5 rounded-xl text-xs md:text-sm leading-relaxed border bg-emerald-50 border-emerald-200 text-emerald-950 fade-up-enter";
+                explainBox.innerHTML = `
+                    <div class="font-bold text-emerald-700 flex items-center gap-1.5 mb-1">
+                        <i class="fa-solid fa-circle-check"></i> 🤖 AI Giải thích: Hành động AN TOÀN
+                    </div>
+                    <p>${selectedOpt.explanation}</p>
+                `;
+            } else {
+                activeLabel.className = "flex items-start gap-3 p-3 rounded-xl border-2 border-red-400 bg-red-50/50 cursor-pointer transition";
+                explainBox.className = "mt-4 p-3.5 rounded-xl text-xs md:text-sm leading-relaxed border bg-red-50 border-red-200 text-red-950 fade-up-enter";
+                explainBox.innerHTML = `
+                    <div class="font-bold text-red-700 flex items-center gap-1.5 mb-1">
+                        <i class="fa-solid fa-triangle-exclamation"></i> 🤖 AI Giải thích: Hành động KHÔNG AN TOÀN
+                    </div>
+                    <p>${selectedOpt.explanation}</p>
+                `;
+            }
+        }
+
+        function updateScoreBadge(total) {
+            const answeredCount = Object.keys(answeredState).length;
+            const safeCount = Object.values(answeredState).filter(Boolean).length;
+            document.getElementById("aiScoreBadge").textContent = `Đã trả lời: ${answeredCount}/${total} câu (${safeCount} an toàn)`;
+        }
+
+        function resetCurrentAIQuiz() {
+            renderQuestionsToDOM();
+        }
+
         function showChemicalDetail(data) {
+            currentChem = data;
             document.getElementById("chemIdBadge").textContent = `MÃ HÓA CHẤT: #${data.id}`;
             document.getElementById("chemName").textContent = data.name;
             document.getElementById("chemFormula").textContent = data.formula;
             document.getElementById("chemCas").textContent = data.cas_number || "Không có";
             document.getElementById("chemManufacturer").textContent = data.manufacturer || "Không có";
             document.getElementById("chemProperties").textContent = data.properties || "Chưa cập nhật";
-            document.getElementById("chemStorage").textContent = data.storage || "Chưa cập nhật";
+            document.getElementById("chemWarning").textContent = data.storage || "Chưa cập nhật cảnh báo";
             document.getElementById("chemFirstAid").textContent = data.firstaid || "Chưa cập nhật";
             document.getElementById("chemSafetyBadge").innerHTML = renderSafetyBadge(data.safety);
 
-            // Hiển thị khung Video custom nếu có link video
             renderVideoBox(data.video_url);
 
             document.getElementById("errorBox").classList.add("hidden");
@@ -292,6 +658,9 @@
 
             const newUrl = `${window.location.pathname}?id=${encodeURIComponent(data.id)}`;
             window.history.replaceState({}, "", newUrl);
+
+            // Gọi AI trên Render để render bộ 5 câu hỏi tương tác
+            fetchAIQuizFromRender(false);
         }
 
         async function loadChemicalInfo() {
