@@ -12,7 +12,7 @@
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
-            transition: opacity 0.25s ease, visibility 0.25s ease;
+            transition: opacity 0.28s ease, visibility 0.28s ease;
         }
         .modal-backdrop.active {
             opacity: 1;
@@ -20,17 +20,74 @@
             pointer-events: auto;
         }
         .modal-card {
-            transform: scale(0.92) translateY(16px);
+            transform: scale(0.9) translateY(18px);
             opacity: 0;
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+            transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease;
         }
         .modal-backdrop.active .modal-card {
             transform: scale(1) translateY(0);
             opacity: 1;
         }
+
+        /* Vòng xoay kép phòng Lab */
+        @keyframes spinSlow {
+            to { transform: rotate(360deg); }
+        }
+        @keyframes spinReverse {
+            to { transform: rotate(-360deg); }
+        }
+        @keyframes shimmerMove {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(220%); }
+        }
+        @keyframes floatBubble {
+            0%, 100% { transform: translateY(0) scale(0.9); opacity: 0.5; }
+            50% { transform: translateY(-6px) scale(1.15); opacity: 1; }
+        }
+        @keyframes rowFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .orbit-outer {
+            animation: spinSlow 2s linear infinite;
+        }
+        .orbit-inner {
+            animation: spinReverse 1.4s linear infinite;
+        }
+        .shimmer-bar::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            width: 55%;
+            background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.85), transparent);
+            animation: shimmerMove 1.3s ease-in-out infinite;
+        }
+        .chem-bubble {
+            animation: floatBubble 1.6s ease-in-out infinite;
+        }
+        .row-animate {
+            animation: rowFadeIn 0.32s ease forwards;
+        }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen font-sans text-slate-800">
+
+    <!-- Popup Loading Toàn Màn Hình khi Lưu / Cập nhật / Xóa -->
+    <div id="actionLoadingModal" class="modal-backdrop fixed inset-0 bg-slate-900/45 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+        <div class="modal-card bg-white rounded-3xl shadow-2xl border border-emerald-100 px-8 py-7 flex flex-col items-center text-center max-w-xs w-full">
+            <div class="relative w-20 h-20 flex items-center justify-center mb-4">
+                <div class="absolute inset-0 rounded-full border-[3px] border-emerald-100 border-t-[#0b5c2c] border-r-emerald-500 orbit-outer"></div>
+                <div class="absolute inset-2.5 rounded-full border-[2.5px] border-emerald-50 border-b-emerald-500 border-l-[#0b5c2c] orbit-inner"></div>
+                <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-[#0b5c2c] flex items-center justify-center shadow-inner">
+                    <i class="fa-solid fa-flask-vial text-lg chem-bubble"></i>
+                </div>
+            </div>
+            <h3 id="actionLoadingTitle" class="font-extrabold text-slate-800 text-base">Đang đồng bộ Cloud...</h3>
+            <p id="actionLoadingSub" class="text-xs text-slate-400 mt-1">Vui lòng chờ trong giây lát</p>
+            <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden relative mt-4 shimmer-bar"></div>
+        </div>
+    </div>
 
     <!-- Header -->
     <header class="bg-[#0b5c2c] text-white shadow-md">
@@ -69,19 +126,19 @@
                 <form id="chemForm" class="space-y-4">
                     <div>
                         <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">TÊN HÓA CHẤT *</label>
-                        <input type="text" id="name" required placeholder="VD: Sulfuric Acid"
+                        <input type="text" id="name" required placeholder="VD: Hydrochloric Acid"
                             class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">CÔNG THỨC *</label>
-                            <input type="text" id="formula" required placeholder="VD: H2SO4"
+                            <input type="text" id="formula" required placeholder="VD: HCl"
                                 class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">SỐ CAS</label>
-                            <input type="text" id="cas_number" placeholder="VD: 7664-93-9"
+                            <input type="text" id="cas_number" placeholder="VD: 7647-01-0"
                                 class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
                         </div>
                     </div>
@@ -104,20 +161,25 @@
                     </div>
 
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ĐIỀU KIỆN & CÁCH BẢO QUẢN</label>
-                        <input type="text" id="storage" placeholder="Nơi khô ráo, thoáng mát, tránh xa các chất dễ cháy..."
-                            class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
-                    </div>
-
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ĐẶC TÍNH VẬT LÝ/HÓA HỌC</label>
-                        <textarea id="properties" rows="2" placeholder="Chất lỏng sánh..."
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ĐẶC TÍNH VẬT LÝ / HÓA HỌC</label>
+                        <textarea id="properties" rows="2" placeholder="Chất lỏng không màu hoặc hơi vàng, bốc khói trong không khí ẩm..."
                             class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"></textarea>
                     </div>
 
+                    <!-- MỤC CẢNH BÁO -->
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">SƠ CỨU KHẨN CẤP</label>
-                        <textarea id="firstaid" rows="2" placeholder="Rửa nước sạch liên tục..."
+                        <label class="block text-[11px] font-bold text-amber-600 uppercase mb-1">
+                            <i class="fa-solid fa-triangle-exclamation mr-1"></i> CẢNH BÁO (NGUY CƠ & LƯU Ý AN TOÀN)
+                        </label>
+                        <textarea id="storage" rows="2" placeholder="Gây bỏng da nghiêm trọng và hỏng mắt. Hơi hóa chất gây kích ứng đường hô hấp, tuyệt đối không ngửi trực tiếp..."
+                            class="w-full px-3.5 py-2 rounded-xl border border-amber-200 bg-amber-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-red-600 uppercase mb-1">
+                            <i class="fa-solid fa-kit-medical mr-1"></i> HƯỚNG DẪN SƠ CỨU KHẨN CẤP
+                        </label>
+                        <textarea id="firstaid" rows="2" placeholder="Rửa ngay vùng tiếp xúc dưới vòi nước sạch liên tục ít nhất 15 phút, báo ngay cho giáo viên..."
                             class="w-full px-3.5 py-2 rounded-xl border border-red-100 bg-red-50/60 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:bg-white transition"></textarea>
                     </div>
 
@@ -132,7 +194,7 @@
                         </label>
                         <input type="url" id="video_url" placeholder="Dán link YouTube, Facebook hoặc Google Drive..."
                             class="w-full px-3.5 py-2 rounded-xl border border-emerald-200 bg-emerald-50/40 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
-                        <p class="text-[10px] text-slate-400 mt-1">Để trống nếu không có video hướng dẫn.</p>
+                        <p class="text-[10px] text-slate-400 mt-1">Hệ thống tự động sinh 5 câu hỏi tương tác AI theo hóa chất này.</p>
                     </div>
 
                     <button type="submit" id="submitBtn"
@@ -151,8 +213,8 @@
                         <i class="fa-solid fa-boxes-stacked text-emerald-600 text-lg"></i>
                         <h2 class="font-bold text-slate-800 text-sm uppercase tracking-wider">KHO HÓA CHẤT</h2>
                     </div>
-                    <button onclick="renderTable()" class="text-xs text-slate-500 hover:text-emerald-600 flex items-center gap-1 transition">
-                        <i class="fa-solid fa-rotate-right"></i> Làm mới
+                    <button onclick="renderTable(true)" class="text-xs text-slate-500 hover:text-emerald-600 flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-emerald-50 transition">
+                        <i id="refreshIcon" class="fa-solid fa-rotate-right"></i> Làm mới
                     </button>
                 </div>
 
@@ -167,11 +229,7 @@
                             </tr>
                         </thead>
                         <tbody id="chemTableBody" class="divide-y divide-slate-100 text-sm">
-                            <tr>
-                                <td colspan="4" class="text-center py-12 text-slate-400">
-                                    <i class="fa-solid fa-spinner fa-spin mr-2"></i> Đang tải dữ liệu từ máy chủ...
-                                </td>
-                            </tr>
+                            <!-- Sẽ được hiển thị bởi renderTable() -->
                         </tbody>
                     </table>
                 </div>
@@ -179,7 +237,7 @@
         </div>
     </main>
 
-    <!-- POPUP CHỈNH SỬA HÓA CHẤT (Có Animation) -->
+    <!-- POPUP CHỈNH SỬA HÓA CHẤT -->
     <div id="editModal" onclick="if(event.target === this) closeEditModal()" class="modal-backdrop fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] flex items-center justify-center z-50 p-4">
         <div class="modal-card bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-100 overflow-hidden max-h-[92vh] flex flex-col">
             
@@ -237,19 +295,23 @@
                 </div>
 
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ĐIỀU KIỆN & CÁCH BẢO QUẢN</label>
-                    <input type="text" id="edit_storage"
-                        class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ĐẶC TÍNH VẬT LÝ / HÓA HỌC</label>
+                    <textarea id="edit_properties" rows="2"
+                        class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"></textarea>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">ĐẶC TÍNH VẬT LÝ/HÓA HỌC</label>
-                        <textarea id="edit_properties" rows="3"
-                            class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"></textarea>
+                        <label class="block text-[11px] font-bold text-amber-600 uppercase mb-1">
+                            <i class="fa-solid fa-triangle-exclamation mr-1"></i> CẢNH BÁO (NGUY CƠ & LƯU Ý)
+                        </label>
+                        <textarea id="edit_storage" rows="3"
+                            class="w-full px-3.5 py-2 rounded-xl border border-amber-200 bg-amber-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition"></textarea>
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">SƠ CỨU KHẨN CẤP</label>
+                        <label class="block text-[11px] font-bold text-red-600 uppercase mb-1">
+                            <i class="fa-solid fa-kit-medical mr-1"></i> HƯỚNG DẪN SƠ CỨU KHẨN CẤP
+                        </label>
                         <textarea id="edit_firstaid" rows="3"
                             class="w-full px-3.5 py-2 rounded-xl border border-red-100 bg-red-50/60 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:bg-white transition"></textarea>
                     </div>
@@ -278,7 +340,7 @@
         </div>
     </div>
 
-    <!-- Modal hiển thị QR Code (Có Animation đồng bộ) -->
+    <!-- Modal hiển thị QR Code -->
     <div id="qrModal" onclick="if(event.target === this) closeQrModal()" class="modal-backdrop fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] flex items-center justify-center z-50 p-4">
         <div class="modal-card bg-white rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
             <button onclick="closeQrModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
@@ -311,6 +373,16 @@
         let allChemicals = [];
         let editingId = null;
 
+        function showActionLoading(title = "Đang đồng bộ dữ liệu...", sub = "Vui lòng chờ trong giây lát") {
+            document.getElementById("actionLoadingTitle").textContent = title;
+            document.getElementById("actionLoadingSub").textContent = sub;
+            document.getElementById("actionLoadingModal").classList.add("active");
+        }
+
+        function hideActionLoading() {
+            document.getElementById("actionLoadingModal").classList.remove("active");
+        }
+
         function getSafetyBadge(safety) {
             if (!safety) return `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">Chưa rõ</span>`;
             if (safety.includes("Nguy hiểm")) {
@@ -322,8 +394,33 @@
             return `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-600 border border-emerald-200">🟢 An toàn</span>`;
         }
 
-        async function renderTable() {
+        function getTableLoadingHTML() {
+            return `
+                <tr>
+                    <td colspan="4" class="py-16 text-center">
+                        <div class="flex flex-col items-center justify-center">
+                            <div class="relative w-16 h-16 flex items-center justify-center mb-3">
+                                <div class="absolute inset-0 rounded-full border-[3px] border-emerald-100 border-t-[#0b5c2c] border-r-emerald-500 orbit-outer"></div>
+                                <div class="absolute inset-2 rounded-full border-[2px] border-emerald-50 border-b-emerald-500 orbit-inner"></div>
+                                <i class="fa-solid fa-flask text-emerald-700 text-base chem-bubble"></i>
+                            </div>
+                            <p class="text-sm font-bold text-slate-700">Đang tải Kho Hóa Chất từ Cloud...</p>
+                            <p class="text-xs text-slate-400 mt-0.5">Đang kết nối tới máy chủ Render</p>
+                            <div class="w-40 h-1 bg-slate-100 rounded-full overflow-hidden relative mt-3 shimmer-bar"></div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        async function renderTable(showSpinner = false) {
             const tbody = document.getElementById("chemTableBody");
+            const refreshIcon = document.getElementById("refreshIcon");
+            if (showSpinner || allChemicals.length === 0) {
+                tbody.innerHTML = getTableLoadingHTML();
+            }
+            if (refreshIcon) refreshIcon.classList.add("fa-spin");
+
             try {
                 const res = await fetch(API_URL);
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -333,15 +430,16 @@
                 if (data.length === 0) {
                     tbody.innerHTML = `
                         <tr>
-                            <td colspan="4" class="text-center py-12 text-slate-400">
+                            <td colspan="4" class="text-center py-14 text-slate-400">
+                                <i class="fa-solid fa-box-open text-2xl mb-2 block text-slate-300"></i>
                                 Chưa có hóa chất nào trong kho. Hãy thêm hóa chất mới ở cột bên trái!
                             </td>
                         </tr>`;
                     return;
                 }
 
-                tbody.innerHTML = data.map(chem => `
-                    <tr class="hover:bg-slate-50/80 transition">
+                tbody.innerHTML = data.map((chem, idx) => `
+                    <tr class="hover:bg-slate-50/80 transition row-animate" style="animation-delay: ${Math.min(idx * 40, 300)}ms">
                         <td class="py-3.5 px-3 font-mono text-xs font-bold text-slate-500">#${chem.id}</td>
                         <td class="py-3.5 px-3">
                             <div class="flex items-center gap-2">
@@ -379,10 +477,11 @@
                             <i class="fa-solid fa-triangle-exclamation mr-1"></i> Không thể kết nối tới API (${API_URL}).
                         </td>
                     </tr>`;
+            } finally {
+                if (refreshIcon) refreshIcon.classList.remove("fa-spin");
             }
         }
 
-        // Mở Popup Chỉnh sửa với hiệu ứng mượt
         function openEditModal(id) {
             const chem = allChemicals.find(c => c.id === id);
             if (!chem) return;
@@ -411,20 +510,18 @@
             document.getElementById("editModal").classList.add("active");
         }
 
-        // Đóng Popup Chỉnh sửa với hiệu ứng thu nhỏ
         function closeEditModal() {
             editingId = null;
             document.getElementById("editModal").classList.remove("active");
         }
 
-        // Xử lý lưu trong Popup Chỉnh sửa (PUT)
         document.getElementById("editChemForm").addEventListener("submit", async (e) => {
             e.preventDefault();
             if (!editingId) return;
 
             const btn = document.getElementById("saveEditBtn");
             btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...`;
+            showActionLoading("Đang cập nhật hóa chất...", `Đang lưu thay đổi cho mã #${editingId}`);
 
             const payload = {
                 name: document.getElementById("edit_name").value.trim(),
@@ -432,9 +529,9 @@
                 cas_number: document.getElementById("edit_cas_number").value.trim() || "Không có",
                 manufacturer: document.getElementById("edit_manufacturer").value.trim() || "Không có",
                 safety: document.getElementById("edit_safety").value,
-                storage: document.getElementById("edit_storage").value.trim() || "Bảo quản nơi khô ráo, thoáng mát",
+                storage: document.getElementById("edit_storage").value.trim() || "Tuân thủ quy tắc an toàn phòng thí nghiệm, đeo kính bảo hộ và găng tay.",
                 properties: document.getElementById("edit_properties").value.trim() || "Chưa cập nhật",
-                firstaid: document.getElementById("edit_firstaid").value.trim() || "Đưa đến cơ sở y tế gần nhất",
+                firstaid: document.getElementById("edit_firstaid").value.trim() || "Rửa ngay bằng nước sạch liên tục và báo cho giáo viên.",
                 video_url: document.getElementById("edit_video_url").value.trim()
             };
 
@@ -449,20 +546,19 @@
                 closeEditModal();
                 await renderTable();
             } catch (err) {
-                alert("Lỗi khi cập nhật! Hãy kiểm tra xem main.py đã thêm hàm PUT chưa.");
+                alert("Lỗi khi cập nhật dữ liệu!");
                 console.error(err);
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Lưu thay đổi`;
+                hideActionLoading();
             }
         });
 
-        // Xử lý thêm hóa chất mới ở cột trái (POST)
         document.getElementById("chemForm").addEventListener("submit", async (e) => {
             e.preventDefault();
             const btn = document.getElementById("submitBtn");
             btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...`;
+            showActionLoading("Đang lưu & tạo mã QR...", "Đang đồng bộ lên Cloud Database");
 
             const payload = {
                 name: document.getElementById("name").value.trim(),
@@ -470,9 +566,9 @@
                 cas_number: document.getElementById("cas_number").value.trim() || "Không có",
                 manufacturer: document.getElementById("manufacturer").value.trim() || "Không có",
                 safety: document.getElementById("safety").value,
-                storage: document.getElementById("storage").value.trim() || "Bảo quản nơi khô ráo, thoáng mát",
+                storage: document.getElementById("storage").value.trim() || "Tuân thủ quy tắc an toàn phòng thí nghiệm, đeo kính bảo hộ và găng tay.",
                 properties: document.getElementById("properties").value.trim() || "Chưa cập nhật",
-                firstaid: document.getElementById("firstaid").value.trim() || "Đưa đến cơ sở y tế gần nhất",
+                firstaid: document.getElementById("firstaid").value.trim() || "Rửa ngay bằng nước sạch liên tục và báo cho giáo viên.",
                 video_url: document.getElementById("video_url").value.trim()
             };
 
@@ -493,17 +589,20 @@
                 console.error(err);
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = `<i class="fa-solid fa-qrcode"></i> Lưu & Sinh QR Code`;
+                hideActionLoading();
             }
         });
 
         async function deleteChemical(id) {
             if (!confirm(`Bạn có chắc muốn xóa hóa chất mã #${id} không?`)) return;
+            showActionLoading("Đang xóa hóa chất...", `Đang xóa mã #${id} khỏi hệ thống`);
             try {
                 const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-                if (res.ok) renderTable();
+                if (res.ok) await renderTable();
             } catch (err) {
                 alert("Không thể xóa hóa chất!");
+            } finally {
+                hideActionLoading();
             }
         }
 
@@ -522,7 +621,6 @@
             document.getElementById("qrModal").classList.remove("active");
         }
 
-        // Hỗ trợ nhấn phím ESC để đóng mượt cả 2 Popup
         document.addEventListener("keydown", (e) => {
             if (e.key === "Escape") {
                 closeEditModal();
@@ -530,7 +628,7 @@
             }
         });
 
-        renderTable();
+        renderTable(true);
     </script>
 </body>
 </html>
