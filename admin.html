@@ -30,12 +30,8 @@
         }
 
         /* Vòng xoay kép phòng Lab */
-        @keyframes spinSlow {
-            to { transform: rotate(360deg); }
-        }
-        @keyframes spinReverse {
-            to { transform: rotate(-360deg); }
-        }
+        @keyframes spinSlow { to { transform: rotate(360deg); } }
+        @keyframes spinReverse { to { transform: rotate(-360deg); } }
         @keyframes shimmerMove {
             0% { transform: translateX(-100%); }
             100% { transform: translateX(220%); }
@@ -49,12 +45,8 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .orbit-outer {
-            animation: spinSlow 2s linear infinite;
-        }
-        .orbit-inner {
-            animation: spinReverse 1.4s linear infinite;
-        }
+        .orbit-outer { animation: spinSlow 2s linear infinite; }
+        .orbit-inner { animation: spinReverse 1.4s linear infinite; }
         .shimmer-bar::after {
             content: "";
             position: absolute;
@@ -63,11 +55,44 @@
             background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.85), transparent);
             animation: shimmerMove 1.3s ease-in-out infinite;
         }
-        .chem-bubble {
-            animation: floatBubble 1.6s ease-in-out infinite;
+        .chem-bubble { animation: floatBubble 1.6s ease-in-out infinite; }
+        .row-animate { animation: rowFadeIn 0.32s ease forwards; }
+
+        /* Hình thoi đỏ chuẩn GHS cho biểu tượng cảnh báo */
+        .ghs-diamond {
+            width: 34px;
+            height: 34px;
+            border: 2.5px solid #dc2626;
+            background: #ffffff;
+            transform: rotate(45deg);
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 1px 3px rgba(220, 38, 38, 0.18);
         }
-        .row-animate {
-            animation: rowFadeIn 0.32s ease forwards;
+        .ghs-diamond i {
+            transform: rotate(-45deg);
+            color: #1e293b;
+            font-size: 14px;
+        }
+        .ghs-diamond-sm {
+            width: 22px;
+            height: 22px;
+            border: 2px solid #dc2626;
+            background: #ffffff;
+            transform: rotate(45deg);
+            border-radius: 3px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .ghs-diamond-sm i {
+            transform: rotate(-45deg);
+            color: #1e293b;
+            font-size: 10px;
         }
     </style>
 </head>
@@ -116,7 +141,7 @@
     <main class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         <!-- Cột trái: Form Thêm Hóa Chất -->
-        <div class="lg:col-span-4">
+        <div class="lg:col-span-5">
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
                 <div class="flex items-center gap-2 pb-4 mb-5 border-b border-slate-100">
                     <i class="fa-solid fa-circle-plus text-emerald-600 text-lg"></i>
@@ -166,13 +191,49 @@
                             class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"></textarea>
                     </div>
 
-                    <!-- MỤC CẢNH BÁO -->
-                    <div>
-                        <label class="block text-[11px] font-bold text-amber-600 uppercase mb-1">
-                            <i class="fa-solid fa-triangle-exclamation mr-1"></i> CẢNH BÁO (NGUY CƠ & LƯU Ý AN TOÀN)
-                        </label>
-                        <textarea id="storage" rows="2" placeholder="Gây bỏng da nghiêm trọng và hỏng mắt. Hơi hóa chất gây kích ứng đường hô hấp, tuyệt đối không ngửi trực tiếp..."
-                            class="w-full px-3.5 py-2 rounded-xl border border-amber-200 bg-amber-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition"></textarea>
+                    <!-- MỤC CẢNH BÁO NÂNG CẤP: DANH SÁCH BIỂU TƯỢNG + HÌNH ẢNH + NỘI DUNG -->
+                    <div class="p-3.5 rounded-2xl border border-amber-200 bg-amber-50/40 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label class="text-[11px] font-extrabold text-amber-800 uppercase flex items-center gap-1.5">
+                                <i class="fa-solid fa-triangle-exclamation text-amber-600"></i> CẢNH BÁO (BIỂU TƯỢNG & HÌNH ẢNH)
+                            </label>
+                            <span class="text-[10px] font-semibold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">Chọn nhiều</span>
+                        </div>
+
+                        <!-- 1. Danh sách chọn biểu tượng cảnh báo GHS -->
+                        <div>
+                            <p class="text-[11px] text-slate-500 font-semibold mb-1.5">1. Chọn các biểu tượng cảnh báo trong danh sách:</p>
+                            <div id="addHazardList" class="max-h-44 overflow-y-auto space-y-1.5 pr-1">
+                                <!-- Render tự động bằng JS -->
+                            </div>
+                        </div>
+
+                        <!-- 2. Chèn hình ảnh cảnh báo (Link hoặc Tải ảnh lên) -->
+                        <div>
+                            <p class="text-[11px] text-slate-500 font-semibold mb-1">2. Chèn hình ảnh cảnh báo minh họa (tùy chọn):</p>
+                            <div class="flex gap-2">
+                                <input type="text" id="add_warning_img" placeholder="Dán link ảnh hoặc bấm nút Tải ảnh..."
+                                    oninput="previewWarningImage('add')"
+                                    class="flex-1 px-3 py-1.5 rounded-xl border border-amber-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                <label class="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold cursor-pointer transition flex items-center gap-1 shrink-0">
+                                    <i class="fa-solid fa-image"></i> Tải ảnh
+                                    <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'add')">
+                                </label>
+                            </div>
+                            <div id="add_img_preview_box" class="hidden mt-2 relative inline-block">
+                                <img id="add_img_preview" src="" alt="Preview" class="h-20 rounded-xl border border-amber-300 object-contain bg-white p-1">
+                                <button type="button" onclick="clearWarningImage('add')" class="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center shadow">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 3. Nội dung cảnh báo chi tiết -->
+                        <div>
+                            <p class="text-[11px] text-slate-500 font-semibold mb-1">3. Danh sách lưu ý cảnh báo (mỗi dòng 1 ý):</p>
+                            <textarea id="storage" rows="2" placeholder="Gây bỏng da nghiêm trọng và hỏng mắt&#10;Tuyệt đối không đưa mũi ngửi trực tiếp&#10;Bắt buộc đeo kính bảo hộ và găng tay"
+                                class="w-full px-3 py-2 rounded-xl border border-amber-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 transition"></textarea>
+                        </div>
                     </div>
 
                     <div>
@@ -194,7 +255,6 @@
                         </label>
                         <input type="url" id="video_url" placeholder="Dán link YouTube, Facebook hoặc Google Drive..."
                             class="w-full px-3.5 py-2 rounded-xl border border-emerald-200 bg-emerald-50/40 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
-                        <p class="text-[10px] text-slate-400 mt-1">Hệ thống tự động sinh 5 câu hỏi tương tác AI theo hóa chất này.</p>
                     </div>
 
                     <button type="submit" id="submitBtn"
@@ -206,7 +266,7 @@
         </div>
 
         <!-- Cột phải: Bảng kho hóa chất -->
-        <div class="lg:col-span-8">
+        <div class="lg:col-span-7">
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 min-h-[540px]">
                 <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
                     <div class="flex items-center gap-2">
@@ -223,14 +283,12 @@
                         <thead>
                             <tr class="border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase">
                                 <th class="py-3 px-3">MÃ ID</th>
-                                <th class="py-3 px-3">HÓA CHẤT</th>
+                                <th class="py-3 px-3">HÓA CHẤT & BIỂU TƯỢNG</th>
                                 <th class="py-3 px-3">MỨC ĐỘ</th>
                                 <th class="py-3 px-3 text-right">THAO TÁC</th>
                             </tr>
                         </thead>
-                        <tbody id="chemTableBody" class="divide-y divide-slate-100 text-sm">
-                            <!-- Sẽ được hiển thị bởi renderTable() -->
-                        </tbody>
+                        <tbody id="chemTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
                     </table>
                 </div>
             </div>
@@ -300,21 +358,48 @@
                         class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"></textarea>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-[11px] font-bold text-amber-600 uppercase mb-1">
-                            <i class="fa-solid fa-triangle-exclamation mr-1"></i> CẢNH BÁO (NGUY CƠ & LƯU Ý)
-                        </label>
-                        <textarea id="edit_storage" rows="3"
-                            class="w-full px-3.5 py-2 rounded-xl border border-amber-200 bg-amber-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition"></textarea>
+                <!-- KHỐI CẢNH BÁO TRONG POPUP SỬA -->
+                <div class="p-4 rounded-2xl border border-amber-200 bg-amber-50/40 space-y-3">
+                    <label class="block text-[11px] font-extrabold text-amber-800 uppercase">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-600 mr-1"></i> CẢNH BÁO (DANH SÁCH BIỂU TƯỢNG & HÌNH ẢNH)
+                    </label>
+
+                    <div id="editHazardList" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto pr-1">
+                        <!-- Render tự động bằng JS -->
                     </div>
+
                     <div>
-                        <label class="block text-[11px] font-bold text-red-600 uppercase mb-1">
-                            <i class="fa-solid fa-kit-medical mr-1"></i> HƯỚNG DẪN SƠ CỨU KHẨN CẤP
-                        </label>
-                        <textarea id="edit_firstaid" rows="3"
-                            class="w-full px-3.5 py-2 rounded-xl border border-red-100 bg-red-50/60 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:bg-white transition"></textarea>
+                        <p class="text-[11px] text-slate-500 font-semibold mb-1">Hình ảnh cảnh báo đính kèm:</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="edit_warning_img" placeholder="Dán link ảnh hoặc bấm Tải ảnh..."
+                                oninput="previewWarningImage('edit')"
+                                class="flex-1 px-3 py-1.5 rounded-xl border border-amber-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <label class="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold cursor-pointer transition flex items-center gap-1 shrink-0">
+                                <i class="fa-solid fa-image"></i> Tải ảnh
+                                <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'edit')">
+                            </label>
+                        </div>
+                        <div id="edit_img_preview_box" class="hidden mt-2 relative inline-block">
+                            <img id="edit_img_preview" src="" alt="Preview" class="h-20 rounded-xl border border-amber-300 object-contain bg-white p-1">
+                            <button type="button" onclick="clearWarningImage('edit')" class="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center shadow">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
                     </div>
+
+                    <div>
+                        <p class="text-[11px] text-slate-500 font-semibold mb-1">Danh sách lưu ý cảnh báo (mỗi dòng 1 ý):</p>
+                        <textarea id="edit_storage" rows="2"
+                            class="w-full px-3.5 py-2 rounded-xl border border-amber-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 transition"></textarea>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-red-600 uppercase mb-1">
+                        <i class="fa-solid fa-kit-medical mr-1"></i> HƯỚNG DẪN SƠ CỨU KHẨN CẤP
+                    </label>
+                    <textarea id="edit_firstaid" rows="2"
+                        class="w-full px-3.5 py-2 rounded-xl border border-red-100 bg-red-50/60 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:bg-white transition"></textarea>
                 </div>
 
                 <div>
@@ -373,6 +458,110 @@
         let allChemicals = [];
         let editingId = null;
 
+        // DANH MỤC BIỂU TƯỢNG & HÌNH ĐỒ CẢNH BÁO CHUẨN PHÒNG LAB (GHS)
+        const HAZARD_CATALOG = [
+            { code: "corrosive", title: "Chất ăn mòn (GHS05)", desc: "Ăn mòn kim loại, gây bỏng da và hỏng mắt nghiêm trọng", icon: "fa-solid fa-hand-dots" },
+            { code: "toxic", title: "Độc cấp tính (GHS06)", desc: "Nguy hiểm chết người hoặc ngộ độc nặng nếu nuốt, hít hoặc tiếp xúc da", icon: "fa-solid fa-skull-crossbones" },
+            { code: "flammable", title: "Chất dễ cháy (GHS02)", desc: "Dễ bắt lửa khi gặp tia lửa, nguồn nhiệt hoặc ma sát", icon: "fa-solid fa-fire-flame-curved" },
+            { code: "oxidizing", title: "Chất oxy hóa (GHS03)", desc: "Có thể gây cháy hoặc làm tăng mạnh nguy cơ cháy nổ", icon: "fa-solid fa-Compact-Disc fa-sun" },
+            { code: "irritant", title: "Cảnh báo kích ứng (GHS07)", desc: "Gây kích ứng da, mắt hoặc đường hô hấp", icon: "fa-solid fa-exclamation" },
+            { code: "health", title: "Nguy hại sức khỏe (GHS08)", desc: "Tổn thương cơ quan nội tạng hoặc hệ hô hấp khi tiếp xúc", icon: "fa-solid fa-heart-crack" },
+            { code: "environment", title: "Nguy hại môi trường (GHS09)", desc: "Rất độc đối với sinh vật thủy sinh, cấm đổ trực tiếp xuống cống", icon: "fa-solid fa-fish-fins" },
+            { code: "nosmell", title: "Cấm ngửi & Nếm thử", desc: "Tuyệt đối không đưa mũi ngửi trực tiếp miệng lọ hóa chất", icon: "fa-solid fa-ban" }
+        ];
+
+        // Khởi tạo danh sách chọn biểu tượng cảnh báo trong Form Thêm và Popup Sửa
+        function initHazardSelectors() {
+            const renderList = (prefix) => HAZARD_CATALOG.map(h => `
+                <label class="flex items-center gap-3 p-2 rounded-xl border border-amber-200/80 bg-white hover:bg-amber-50 cursor-pointer transition">
+                    <input type="checkbox" name="${prefix}_hazard" value="${h.code}" class="w-4 h-4 text-amber-600 rounded focus:ring-amber-500">
+                    <span class="ghs-diamond">
+                        <i class="${h.icon}"></i>
+                    </span>
+                    <div class="leading-tight">
+                        <span class="block text-xs font-bold text-slate-800">${h.title}</span>
+                        <span class="block text-[10px] text-slate-500">${h.desc}</span>
+                    </div>
+                </label>
+            `).join("");
+
+            document.getElementById("addHazardList").innerHTML = renderList("add");
+            document.getElementById("editHazardList").innerHTML = renderList("edit");
+        }
+
+        // Nén và chuyển ảnh tải lên từ máy thành chuỗi Base64 gọn nhẹ
+        function handleImageUpload(event, prefix) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement("canvas");
+                    const maxDim = 480;
+                    let w = img.width, h = img.height;
+                    if (w > h && w > maxDim) { h = Math.round(h * maxDim / w); w = maxDim; }
+                    else if (h > maxDim) { w = Math.round(w * maxDim / h); h = maxDim; }
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0, w, h);
+                    const dataUrl = canvas.toDataURL("image/jpeg", 0.78);
+                    document.getElementById(`${prefix}_warning_img`).value = dataUrl;
+                    previewWarningImage(prefix);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function previewWarningImage(prefix) {
+            const val = document.getElementById(`${prefix}_warning_img`).value.trim();
+            const box = document.getElementById(`${prefix}_img_preview_box`);
+            const img = document.getElementById(`${prefix}_img_preview`);
+            if (val) {
+                img.src = val;
+                box.classList.remove("hidden");
+            } else {
+                img.src = "";
+                box.classList.add("hidden");
+            }
+        }
+
+        function clearWarningImage(prefix) {
+            document.getElementById(`${prefix}_warning_img`).value = "";
+            previewWarningImage(prefix);
+        }
+
+        // Đóng gói Biểu tượng + Hình ảnh + Nội dung cảnh báo vào trường storage
+        function packWarningData(prefix, textInputId) {
+            const checked = Array.from(document.querySelectorAll(`input[name="${prefix}_hazard"]:checked`)).map(el => el.value);
+            const imgUrl = document.getElementById(`${prefix}_warning_img`).value.trim();
+            const rawText = document.getElementById(textInputId).value.trim() || "Tuân thủ quy tắc an toàn phòng thí nghiệm, đeo kính bảo hộ và găng tay.";
+            return JSON.stringify({
+                v: 2,
+                badges: checked,
+                image: imgUrl,
+                text: rawText
+            });
+        }
+
+        // Giải mã dữ liệu cảnh báo (hỗ trợ cả dữ liệu cũ dạng chữ thường và dữ liệu mới có icon/ảnh)
+        function unpackWarningData(rawStorage) {
+            if (!rawStorage) return { badges: ["irritant"], image: "", text: "Chưa cập nhật cảnh báo" };
+            try {
+                const parsed = JSON.parse(rawStorage);
+                if (parsed && typeof parsed === "object" && ("text" in parsed || "badges" in parsed)) {
+                    return {
+                        badges: Array.isArray(parsed.badges) ? parsed.badges : [],
+                        image: parsed.image || "",
+                        text: parsed.text || ""
+                    };
+                }
+            } catch (e) {}
+            return { badges: [], image: "", text: rawStorage };
+        }
+
         function showActionLoading(title = "Đang đồng bộ dữ liệu...", sub = "Vui lòng chờ trong giây lát") {
             document.getElementById("actionLoadingTitle").textContent = title;
             document.getElementById("actionLoadingSub").textContent = sub;
@@ -392,6 +581,17 @@
                 return `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-600 border border-amber-200">🟡 Cảnh báo</span>`;
             }
             return `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-600 border border-emerald-200">🟢 An toàn</span>`;
+        }
+
+        function renderMiniHazardIcons(rawStorage) {
+            const w = unpackWarningData(rawStorage);
+            if (!w.badges || w.badges.length === 0) return "";
+            const iconsHtml = w.badges.map(code => {
+                const found = HAZARD_CATALOG.find(h => h.code === code);
+                if (!found) return "";
+                return `<span class="ghs-diamond-sm" title="${found.title}"><i class="${found.icon}"></i></span>`;
+            }).join("");
+            return `<div class="flex items-center gap-2 mt-1.5">${iconsHtml}${w.image ? `<span class="text-[10px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded"><i class="fa-solid fa-image mr-0.5"></i>Ảnh</span>` : ""}</div>`;
         }
 
         function getTableLoadingHTML() {
@@ -447,6 +647,7 @@
                                 ${chem.video_url ? `<span class="px-2 py-0.5 rounded-md bg-emerald-100 text-[#0b5c2c] text-[10px] font-bold flex items-center gap-1"><i class="fa-solid fa-play"></i> Video</span>` : ''}
                             </div>
                             <div class="text-xs text-slate-400 font-mono">${chem.formula} ${chem.cas_number ? `• CAS: ${chem.cas_number}` : ''}</div>
+                            ${renderMiniHazardIcons(chem.storage)}
                         </td>
                         <td class="py-3.5 px-3">${getSafetyBadge(chem.safety)}</td>
                         <td class="py-3.5 px-3 text-right space-x-1 whitespace-nowrap">
@@ -502,7 +703,15 @@
                 document.getElementById("edit_safety").value = "Nguy hiểm";
             }
 
-            document.getElementById("edit_storage").value = chem.storage || "";
+            // Khôi phục Biểu tượng + Hình ảnh + Nội dung cảnh báo
+            const wData = unpackWarningData(chem.storage);
+            document.querySelectorAll('input[name="edit_hazard"]').forEach(cb => {
+                cb.checked = wData.badges.includes(cb.value);
+            });
+            document.getElementById("edit_warning_img").value = wData.image || "";
+            previewWarningImage("edit");
+            document.getElementById("edit_storage").value = wData.text || "";
+
             document.getElementById("edit_properties").value = chem.properties || "";
             document.getElementById("edit_firstaid").value = chem.firstaid || "";
             document.getElementById("edit_video_url").value = chem.video_url || "";
@@ -529,7 +738,7 @@
                 cas_number: document.getElementById("edit_cas_number").value.trim() || "Không có",
                 manufacturer: document.getElementById("edit_manufacturer").value.trim() || "Không có",
                 safety: document.getElementById("edit_safety").value,
-                storage: document.getElementById("edit_storage").value.trim() || "Tuân thủ quy tắc an toàn phòng thí nghiệm, đeo kính bảo hộ và găng tay.",
+                storage: packWarningData("edit", "edit_storage"),
                 properties: document.getElementById("edit_properties").value.trim() || "Chưa cập nhật",
                 firstaid: document.getElementById("edit_firstaid").value.trim() || "Rửa ngay bằng nước sạch liên tục và báo cho giáo viên.",
                 video_url: document.getElementById("edit_video_url").value.trim()
@@ -566,7 +775,7 @@
                 cas_number: document.getElementById("cas_number").value.trim() || "Không có",
                 manufacturer: document.getElementById("manufacturer").value.trim() || "Không có",
                 safety: document.getElementById("safety").value,
-                storage: document.getElementById("storage").value.trim() || "Tuân thủ quy tắc an toàn phòng thí nghiệm, đeo kính bảo hộ và găng tay.",
+                storage: packWarningData("add", "storage"),
                 properties: document.getElementById("properties").value.trim() || "Chưa cập nhật",
                 firstaid: document.getElementById("firstaid").value.trim() || "Rửa ngay bằng nước sạch liên tục và báo cho giáo viên.",
                 video_url: document.getElementById("video_url").value.trim()
@@ -582,6 +791,7 @@
                 const result = await res.json();
 
                 document.getElementById("chemForm").reset();
+                clearWarningImage("add");
                 await renderTable();
                 showQrModal(result.id, payload.name, payload.formula);
             } catch (err) {
@@ -628,6 +838,7 @@
             }
         });
 
+        initHazardSelectors();
         renderTable(true);
     </script>
 </body>
