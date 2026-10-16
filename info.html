@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Hiệu ứng đóng/mở mượt cho Popup Loading chính */
+        /* Hiệu ứng đóng/mở mượt cho Popup Loading & Lightbox xem ảnh */
         .loading-backdrop {
             opacity: 0;
             visibility: hidden;
@@ -30,12 +30,8 @@
         }
 
         /* Vòng xoay kép & bọt khí phòng Lab */
-        @keyframes orbitClockwise {
-            to { transform: rotate(360deg); }
-        }
-        @keyframes orbitCounter {
-            to { transform: rotate(-360deg); }
-        }
+        @keyframes orbitClockwise { to { transform: rotate(360deg); } }
+        @keyframes orbitCounter { to { transform: rotate(-360deg); } }
         @keyframes flaskFloat {
             0%, 100% { transform: translateY(0) rotate(0deg); }
             50% { transform: translateY(-4px) rotate(4deg); }
@@ -58,24 +54,12 @@
             100% { transform: scale(1.55); opacity: 0; }
         }
 
-        .ring-cw {
-            animation: orbitClockwise 1.8s linear infinite;
-        }
-        .ring-ccw {
-            animation: orbitCounter 1.3s linear infinite;
-        }
-        .flask-anim {
-            animation: flaskFloat 2s ease-in-out infinite;
-        }
-        .bubble-1 {
-            animation: bubbleRise 1.4s ease-in infinite;
-        }
-        .bubble-2 {
-            animation: bubbleRise 1.4s ease-in 0.45s infinite;
-        }
-        .bubble-3 {
-            animation: bubbleRise 1.4s ease-in 0.9s infinite;
-        }
+        .ring-cw { animation: orbitClockwise 1.8s linear infinite; }
+        .ring-ccw { animation: orbitCounter 1.3s linear infinite; }
+        .flask-anim { animation: flaskFloat 2s ease-in-out infinite; }
+        .bubble-1 { animation: bubbleRise 1.4s ease-in infinite; }
+        .bubble-2 { animation: bubbleRise 1.4s ease-in 0.45s infinite; }
+        .bubble-3 { animation: bubbleRise 1.4s ease-in 0.9s infinite; }
         .progress-shimmer::after {
             content: "";
             position: absolute;
@@ -95,25 +79,42 @@
         .fade-up-enter {
             animation: contentFadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
+
+        /* Biểu tượng hình thoi đỏ chuẩn GHS trong danh sách Cảnh báo */
+        .ghs-diamond-lg {
+            width: 44px;
+            height: 44px;
+            border: 3px solid #dc2626;
+            background: #ffffff;
+            transform: rotate(45deg);
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 3px 8px rgba(220, 38, 38, 0.16);
+        }
+        .ghs-diamond-lg i {
+            transform: rotate(-45deg);
+            color: #111827;
+            font-size: 18px;
+        }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col font-sans text-slate-800">
 
-    <!-- POPUP LOADING PHÒNG LAB (HIỆU ỨNG MƯỢT KHI QUÉT QR / TÌM KIẾM) -->
+    <!-- 1. POPUP LOADING PHÒNG LAB (HIỆU ỨNG KHI QUÉT QR / TÌM KIẾM) -->
     <div id="loadingPopup" class="loading-backdrop active fixed inset-0 bg-slate-900/45 backdrop-blur-sm flex items-center justify-center z-50 p-4">
         <div class="loading-card bg-white rounded-3xl shadow-2xl border border-emerald-100 px-8 py-7 flex flex-col items-center text-center max-w-xs w-full relative overflow-hidden">
-            <!-- Ánh sáng trang trí nền -->
             <div class="absolute -top-10 -right-10 w-28 h-28 bg-emerald-100/60 rounded-full blur-2xl pointer-events-none"></div>
             <div class="absolute -bottom-10 -left-10 w-28 h-28 bg-emerald-50 rounded-full blur-2xl pointer-events-none"></div>
 
-            <!-- Vòng xoay kép + Bình thí nghiệm sủi bọt -->
             <div class="relative w-24 h-24 flex items-center justify-center mb-4">
                 <div class="absolute inset-0 rounded-full border-[3.5px] border-emerald-100 border-t-[#0b5c2c] border-r-emerald-500 ring-cw"></div>
                 <div class="absolute inset-3 rounded-full border-[2.5px] border-emerald-50 border-b-emerald-500 border-l-[#0b5c2c] ring-ccw"></div>
                 
                 <div class="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100/80 text-[#0b5c2c] flex items-center justify-center shadow-inner">
                     <i class="fa-solid fa-flask text-2xl flask-anim"></i>
-                    <!-- Bọt khí hóa học bay lên -->
                     <span class="absolute top-1.5 left-3.5 w-1.5 h-1.5 rounded-full bg-emerald-500 bubble-1"></span>
                     <span class="absolute top-2 right-3.5 w-2 h-2 rounded-full bg-[#0b5c2c] bubble-2"></span>
                     <span class="absolute top-1 left-5 w-1.5 h-1.5 rounded-full bg-emerald-400 bubble-3"></span>
@@ -126,12 +127,22 @@
             <h3 class="font-extrabold text-slate-800 text-base">Đang phân tích mã QR...</h3>
             <p id="loadingPopupText" class="text-xs text-slate-500 mt-1">Đang tải hồ sơ an toàn hóa chất</p>
 
-            <!-- Thanh Shimmer chạy mượt -->
             <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden relative mt-5 progress-shimmer"></div>
         </div>
     </div>
 
-    <!-- Header Full Screen -->
+    <!-- 2. POPUP PHÓNG TO HÌNH ẢNH CẢNH BÁO -->
+    <div id="imgLightbox" onclick="closeImageLightbox()" class="loading-backdrop fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="loading-card relative max-w-2xl w-full bg-white p-3 rounded-2xl shadow-2xl" onclick="event.stopPropagation()">
+            <button onclick="closeImageLightbox()" class="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-lg transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <img id="lightboxImg" src="" alt="Hình ảnh cảnh báo" class="w-full max-h-[78vh] object-contain rounded-xl bg-slate-50">
+            <p id="lightboxCaption" class="text-center text-xs font-bold text-slate-600 mt-2 py-1">Hình ảnh cảnh báo an toàn hóa chất</p>
+        </div>
+    </div>
+
+    <!-- 3. HEADER FULL SCREEN -->
     <header class="bg-[#0b5c2c] text-white shadow-md w-full">
         <div class="w-full px-6 md:px-10 py-4 flex items-center justify-between">
             <div class="flex items-center space-x-3">
@@ -140,22 +151,26 @@
                 </div>
                 <div>
                     <h1 class="font-bold text-lg tracking-wide uppercase leading-tight">THCS HÙNG VƯƠNG</h1>
-                    <p class="text-xs text-emerald-100">Cổng Tra cứu An toàn Hóa chất</p>
+                    <p class="text-xs text-emerald-100">Cổng Tra cứu An toàn Hóa chất & Tương tác AI</p>
                 </div>
             </div>
+
+            <button onclick="showManualSearchModal()" class="text-xs bg-white/15 hover:bg-white/25 text-white px-3.5 py-2 rounded-xl font-semibold transition flex items-center gap-1.5">
+                <i class="fa-solid fa-magnifying-glass"></i> <span class="hidden sm:inline">Tra cứu chất khác</span>
+            </button>
         </div>
     </header>
 
-    <!-- Main Container Full Screen -->
+    <!-- 4. MAIN CONTAINER FULL SCREEN -->
     <main class="flex-1 w-full px-4 sm:px-8 md:px-12 py-6 flex flex-col">
 
-        <!-- Trạng thái lỗi (Khi mã QR không hợp lệ -> Hiện thanh tìm kiếm) -->
+        <!-- Trạng thái lỗi / Tìm kiếm thủ công -->
         <div id="errorBox" class="hidden flex-1 w-full bg-white rounded-2xl shadow-sm border border-red-100 p-8 flex flex-col items-center justify-center text-center fade-up-enter">
             <div class="w-16 h-16 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-4">
                 <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
             </div>
-            <h2 class="font-bold text-slate-800 text-xl mb-1">Không tìm thấy dữ liệu hóa chất</h2>
-            <p id="errorDesc" class="text-sm text-slate-400 mb-6">Mã hóa chất không tồn tại hoặc đường dẫn chưa chính xác. Hãy tìm theo tên, công thức hoặc mã ID:</p>
+            <h2 id="errorTitle" class="font-bold text-slate-800 text-xl mb-1">Không tìm thấy dữ liệu hóa chất</h2>
+            <p id="errorDesc" class="text-sm text-slate-400 mb-6">Nhập tên hóa chất, công thức (VD: HCl, H2SO4, NaOH) hoặc mã ID để tra cứu:</p>
             
             <div class="flex w-full max-w-lg mx-auto gap-2.5">
                 <input type="text" id="manualSearchInput"
@@ -169,12 +184,12 @@
             </div>
 
             <div id="multiMatchBox" class="hidden w-full max-w-lg mx-auto mt-6 text-left">
-                <p class="text-xs font-bold text-slate-400 uppercase mb-2">Chọn hóa chất phù hợp:</p>
-                <div id="multiMatchList" class="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50"></div>
+                <p class="text-xs font-bold text-slate-400 uppercase mb-2">Chọn hóa chất trong kho:</p>
+                <div id="multiMatchList" class="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50 max-h-64 overflow-y-auto"></div>
             </div>
         </div>
 
-        <!-- Nội dung chi tiết hóa chất khi quét QR hợp lệ -->
+        <!-- NỘI DUNG CHI TIẾT HÓA CHẤT KHI QUÉT QR HỢP LỆ -->
         <div id="chemContent" class="hidden flex-1 w-full flex flex-col gap-6 fade-up-enter">
             
             <!-- Thẻ tiêu đề hóa chất -->
@@ -203,28 +218,55 @@
                 </div>
             </div>
 
-            <!-- 3 CỘT CHUẨN YÊU CẦU CÔ GIÁO: ĐẶC TÍNH VẬT LÝ/HÓA HỌC - CẢNH BÁO - HƯỚNG DẪN SƠ CỨU KHẨN CẤP -->
+            <!-- 3 CỘT CHUẨN YÊU CẦU CÔ GIÁO: ĐẶC TÍNH VẬT LÝ/HÓA HỌC - CẢNH BÁO (DANH SÁCH HÌNH ẢNH & BIỂU TƯỢNG) - HƯỚNG DẪN SƠ CỨU KHẨN CẤP -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 flex flex-col">
-                    <h3 class="text-xs md:text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2 mb-3">
-                        <i class="fa-solid fa-atom text-emerald-600 text-base"></i> ĐẶC TÍNH VẬT LÝ / HÓA HỌC
-                    </h3>
-                    <p id="chemProperties" class="text-base text-slate-700 leading-relaxed whitespace-pre-line flex-1">---</p>
+                
+                <!-- CỘT 1: ĐẶC TÍNH VẬT LÝ / HÓA HỌC -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-7 flex flex-col">
+                    <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                        <h3 class="text-xs md:text-sm font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                <i class="fa-solid fa-atom"></i>
+                            </span>
+                            ĐẶC TÍNH VẬT LÝ / HÓA HỌC
+                        </h3>
+                    </div>
+                    <ul id="chemPropertiesList" class="space-y-2.5 text-sm md:text-base text-slate-700 leading-relaxed flex-1"></ul>
                 </div>
 
-                <div class="bg-amber-50/70 rounded-2xl shadow-sm border border-amber-200 p-6 md:p-8 flex flex-col">
-                    <h3 class="text-xs md:text-sm font-bold text-amber-700 uppercase tracking-wider flex items-center gap-2 mb-3">
-                        <i class="fa-solid fa-triangle-exclamation text-amber-600 text-base"></i> CẢNH BÁO
-                    </h3>
-                    <p id="chemWarning" class="text-base text-amber-950 font-medium leading-relaxed whitespace-pre-line flex-1">---</p>
+                <!-- CỘT 2: CẢNH BÁO (DANH SÁCH KẾT HỢP HÌNH ẢNH + BIỂU TƯỢNG GHS + LƯU Ý) -->
+                <div class="bg-amber-50/70 rounded-2xl shadow-sm border-2 border-amber-200/90 p-6 md:p-7 flex flex-col">
+                    <div class="flex items-center justify-between pb-3 mb-4 border-b border-amber-200/80">
+                        <h3 class="text-xs md:text-sm font-extrabold text-amber-900 uppercase tracking-wider flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center shadow-sm">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            </span>
+                            CẢNH BÁO
+                        </h3>
+                        <span class="text-[11px] font-bold bg-white text-amber-800 px-2.5 py-0.5 rounded-full border border-amber-300 shadow-sm">
+                            Biểu tượng & Hình ảnh
+                        </span>
+                    </div>
+
+                    <!-- DANH SÁCH THỐNG NHẤT: GỒM CÁC THẺ HÌNH ẢNH + BIỂU TƯỢNG CẢNH BÁO + DÒNG LƯU Ý -->
+                    <ul id="chemWarningUnifiedList" class="space-y-3 flex-1">
+                        <!-- Render tự động bằng JS -->
+                    </ul>
                 </div>
 
-                <div class="bg-red-50/80 rounded-2xl shadow-sm border border-red-200 p-6 md:p-8 flex flex-col">
-                    <h3 class="text-xs md:text-sm font-bold text-red-600 uppercase tracking-wider flex items-center gap-2 mb-3">
-                        <i class="fa-solid fa-kit-medical text-base"></i> HƯỚNG DẪN SƠ CỨU KHẨN CẤP
-                    </h3>
-                    <p id="chemFirstAid" class="text-base text-red-900 font-medium leading-relaxed whitespace-pre-line flex-1">---</p>
+                <!-- CỘT 3: HƯỚNG DẪN SƠ CỨU KHẨN CẤP -->
+                <div class="bg-red-50/80 rounded-2xl shadow-sm border-2 border-red-200/90 p-6 md:p-7 flex flex-col">
+                    <div class="flex items-center justify-between pb-3 mb-4 border-b border-red-200/80">
+                        <h3 class="text-xs md:text-sm font-extrabold text-red-700 uppercase tracking-wider flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-red-600 text-white flex items-center justify-center shadow-sm">
+                                <i class="fa-solid fa-kit-medical"></i>
+                            </span>
+                            HƯỚNG DẪN SƠ CỨU KHẨN CẤP
+                        </h3>
+                    </div>
+                    <ul id="chemFirstAidList" class="space-y-2.5 text-sm md:text-base text-red-950 font-medium leading-relaxed flex-1"></ul>
                 </div>
+
             </div>
 
             <!-- KHUNG VIDEO CUSTOM ĐỒNG BỘ TÔNG MÀU CHỦ ĐẠO (#0b5c2c) -->
@@ -269,7 +311,7 @@
                             </span>
                         </div>
                         <p class="text-sm text-slate-600 mt-2">
-                            AI có thể đưa ra các tình huống đối với <strong id="aiChemLabel" class="text-[#0b5c2c]">hóa chất này</strong> để học sinh lựa chọn câu trả lời, sau đó giải thích vì sao hành động đó an toàn hoặc không an toàn.
+                            AI đưa ra 5 tình huống thực tế đối với <strong id="aiChemLabel" class="text-[#0b5c2c]">hóa chất này</strong> để học sinh lựa chọn câu trả lời, sau đó giải thích vì sao hành động đó an toàn hoặc không an toàn.
                         </p>
                     </div>
 
@@ -302,7 +344,6 @@
                         <p class="text-xs text-slate-400 mt-1">Đang tổng hợp dữ liệu Cảnh báo & Sơ cứu từ Render</p>
                         <div class="w-48 h-1.5 bg-slate-200/70 rounded-full overflow-hidden relative mt-4 progress-shimmer"></div>
 
-                        <!-- Khung Skeleton mô phỏng câu hỏi đang được tạo -->
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full mt-6 text-left opacity-60">
                             <div class="bg-white p-4 rounded-xl border border-slate-200/80 space-y-2.5 animate-pulse">
                                 <div class="h-3.5 bg-slate-200 rounded w-3/4"></div>
@@ -344,6 +385,211 @@
         let answeredState = {};
         let variationCounter = 1;
 
+        // DANH MỤC BIỂU TƯỢNG & HÌNH ẢNH CẢNH BÁO CHUẨN QUỐC TẾ GHS (KÈM ẢNH PICTOGRAM CHÍNH THỨC)
+        const HAZARD_CATALOG = [
+            {
+                code: "corrosive",
+                title: "Chất ăn mòn (GHS05)",
+                desc: "Ăn mòn kim loại, gây bỏng da sâu và tổn thương mắt nghiêm trọng.",
+                icon: "fa-solid fa-hand-dots",
+                ghsImg: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/GHS-pictogram-acid.svg/120px-GHS-pictogram-acid.svg.png"
+            },
+            {
+                code: "toxic",
+                title: "Độc cấp tính (GHS06)",
+                desc: "Nguy hiểm nghiêm trọng nếu nuốt phải, hít phải hơi hoặc tiếp xúc qua da.",
+                icon: "fa-solid fa-skull-crossbones",
+                ghsImg: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/GHS-pictogram-skull.svg/120px-GHS-pictogram-skull.svg.png"
+            },
+            {
+                code: "flammable",
+                title: "Chất dễ cháy (GHS02)",
+                desc: "Dễ bắt lửa và bốc cháy khi gặp tia lửa, nguồn nhiệt hoặc ma sát.",
+                icon: "fa-solid fa-fire-flame-curved",
+                ghsImg: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/GHS-pictogram-flamme.svg/120px-GHS-pictogram-flamme.svg.png"
+            },
+            {
+                code: "oxidizing",
+                title: "Chất oxy hóa mạnh (GHS03)",
+                desc: "Có thể gây cháy hoặc làm tăng mạnh tốc độ cháy của các chất khác.",
+                icon: "fa-solid fa-sun",
+                ghsImg: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/GHS-pictogram-rondflam.svg/120px-GHS-pictogram-rondflam.svg.png"
+            },
+            {
+                code: "irritant",
+                title: "Cảnh báo kích ứng (GHS07)",
+                desc: "Gây kích ứng da, đỏ mắt hoặc kích ứng đường hô hấp khi tiếp xúc.",
+                icon: "fa-solid fa-exclamation",
+                ghsImg: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/GHS-pictogram-exclam.svg/120px-GHS-pictogram-exclam.svg.png"
+            },
+            {
+                code: "health",
+                title: "Nguy hại sức khỏe (GHS08)",
+                desc: "Tổn thương hệ hô hấp hoặc cơ quan nội tạng nếu tiếp xúc lâu dài.",
+                icon: "fa-solid fa-heart-crack",
+                ghsImg: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/GHS-pictogram-silhouette.svg/120px-GHS-pictogram-silhouette.svg.png"
+            },
+            {
+                code: "environment",
+                title: "Nguy hại môi trường (GHS09)",
+                desc: "Độc hại với sinh vật thủy sinh, cấm đổ trực tiếp xuống bồn rửa.",
+                icon: "fa-solid fa-fish-fins",
+                ghsImg: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/GHS-pictogram-pollu.svg/120px-GHS-pictogram-pollu.svg.png"
+            },
+            {
+                code: "nosmell",
+                title: "Cấm ngửi & Nếm trực tiếp",
+                desc: "Tuyệt đối không đưa mũi ngửi sát miệng lọ hóa chất.",
+                icon: "fa-solid fa-ban",
+                ghsImg: ""
+            }
+        ];
+
+        // Giải mã dữ liệu Cảnh báo từ trường storage (tương thích cả JSON mới và văn bản cũ)
+        function unpackWarningData(rawStorage, safetyLevel = "") {
+            if (!rawStorage) {
+                return { badges: ["irritant", "nosmell"], image: "", text: "Tuân thủ quy tắc an toàn phòng thí nghiệm, đeo kính bảo hộ và găng tay." };
+            }
+            try {
+                const parsed = JSON.parse(rawStorage);
+                if (parsed && typeof parsed === "object" && ("text" in parsed || "badges" in parsed)) {
+                    return {
+                        badges: Array.isArray(parsed.badges) ? parsed.badges : [],
+                        image: parsed.image || "",
+                        text: parsed.text || ""
+                    };
+                }
+            } catch (e) {}
+
+            // Tự động nhận diện biểu tượng nếu dữ liệu cũ chỉ là chuỗi văn bản
+            const lower = rawStorage.toLowerCase();
+            const autoBadges = [];
+            if (lower.includes("ăn mòn") || lower.includes("bỏng") || lower.includes("axit") || lower.includes("acid") || lower.includes("kiềm")) {
+                autoBadges.push("corrosive");
+            }
+            if (lower.includes("độc")) autoBadges.push("toxic");
+            if (lower.includes("cháy") || lower.includes("lửa") || lower.includes("cồn")) autoBadges.push("flammable");
+            if (lower.includes("oxy hóa") || lower.includes("oxi hóa")) autoBadges.push("oxidizing");
+            if (lower.includes("môi trường") || lower.includes("thủy sinh")) autoBadges.push("environment");
+
+            if (autoBadges.length === 0) {
+                if (safetyLevel.includes("Nguy hiểm")) autoBadges.push("corrosive");
+                else autoBadges.push("irritant");
+            }
+            autoBadges.push("nosmell");
+
+            return { badges: autoBadges, image: "", text: rawStorage };
+        }
+
+        // Render cột CẢNH BÁO dưới dạng 1 Danh sách thống nhất gồm Hình ảnh + Biểu tượng + Lưu ý
+        function renderWarningSection(rawStorage, safetyLevel) {
+            const wData = unpackWarningData(rawStorage, safetyLevel);
+            const listEl = document.getElementById("chemWarningUnifiedList");
+            const itemsHTML = [];
+
+            // 1. Đưa Hình ảnh cảnh báo đính kèm (nếu có) lên đầu danh sách
+            if (wData.image) {
+                itemsHTML.push(`
+                    <li class="p-3 rounded-xl bg-white border-2 border-amber-300 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-extrabold text-amber-800 uppercase flex items-center gap-1.5">
+                                <i class="fa-solid fa-image text-amber-600"></i> Hình ảnh cảnh báo trực quan
+                            </span>
+                            <span class="text-[10px] text-amber-700 font-semibold">Bấm để phóng to</span>
+                        </div>
+                        <img src="${wData.image}" alt="Hình ảnh cảnh báo"
+                            onclick="openImageLightbox(this.src, 'Hình ảnh cảnh báo an toàn')"
+                            class="w-full max-h-48 object-contain rounded-lg bg-slate-50 p-1 cursor-zoom-in border border-amber-100 mx-auto">
+                    </li>
+                `);
+            }
+
+            // 2. Render từng Biểu tượng + Hình đồ GHS trong danh sách
+            const selectedHazards = (wData.badges && wData.badges.length > 0)
+                ? wData.badges.map(code => HAZARD_CATALOG.find(h => h.code === code)).filter(Boolean)
+                : [HAZARD_CATALOG[4], HAZARD_CATALOG[7]];
+
+            selectedHazards.forEach(item => {
+                const visualSymbol = item.ghsImg
+                    ? `<img src="${item.ghsImg}" alt="${item.title}"
+                           onclick="openImageLightbox('${item.ghsImg}', '${item.title}')"
+                           onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';"
+                           class="w-12 h-12 object-contain shrink-0 cursor-zoom-in drop-shadow-sm">
+                       <span class="ghs-diamond-lg hidden"><i class="${item.icon}"></i></span>`
+                    : `<span class="ghs-diamond-lg"><i class="${item.icon}"></i></span>`;
+
+                itemsHTML.push(`
+                    <li class="flex items-center gap-3.5 p-3 rounded-xl bg-white border border-amber-200/90 shadow-sm hover:border-amber-400 transition">
+                        ${visualSymbol}
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-1.5">
+                                <i class="${item.icon} text-xs text-red-600"></i>
+                                <p class="font-extrabold text-slate-800 text-sm leading-tight">${item.title}</p>
+                            </div>
+                            <p class="text-xs text-slate-600 mt-1 leading-snug">${item.desc}</p>
+                        </div>
+                    </li>
+                `);
+            });
+
+            // 3. Render các dòng lưu ý cảnh báo chi tiết thành các mục có icon trong cùng danh sách
+            const lines = (wData.text || "")
+                .split(/\r?\n|•|;/)
+                .map(line => line.replace(/^[-*]\s*/, "").trim())
+                .filter(Boolean);
+
+            lines.forEach(line => {
+                itemsHTML.push(`
+                    <li class="flex items-start gap-3 p-3 rounded-xl bg-amber-100/70 border border-amber-300/80 text-amber-950">
+                        <span class="w-6 h-6 rounded-lg bg-amber-500 text-white flex items-center justify-center text-xs shrink-0 mt-0.5 shadow-sm">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </span>
+                        <span class="text-sm font-semibold leading-relaxed">${line}</span>
+                    </li>
+                `);
+            });
+
+            listEl.innerHTML = itemsHTML.join("");
+        }
+
+        // Render Đặc tính & Sơ cứu thành danh sách có icon rõ ràng
+        function renderBulletListWithIcons(elementId, rawText, iconClass, badgeBgClass) {
+            const ul = document.getElementById(elementId);
+            const lines = (rawText || "Chưa cập nhật")
+                .split(/\r?\n|•/)
+                .map(l => l.replace(/^[-*]\s*/, "").trim())
+                .filter(Boolean);
+
+            ul.innerHTML = lines.map(line => `
+                <li class="flex items-start gap-3 p-3 rounded-xl bg-slate-50/90 border border-slate-200/70">
+                    <span class="w-6 h-6 rounded-lg ${badgeBgClass} flex items-center justify-center text-xs shrink-0 mt-0.5">
+                        <i class="${iconClass}"></i>
+                    </span>
+                    <span class="text-sm leading-relaxed flex-1">${line}</span>
+                </li>
+            `).join("");
+        }
+
+        function getPlainWarningSummary(rawStorage, safetyLevel) {
+            const wData = unpackWarningData(rawStorage, safetyLevel);
+            const titles = wData.badges
+                .map(code => HAZARD_CATALOG.find(h => h.code === code)?.title)
+                .filter(Boolean)
+                .join(", ");
+            return titles ? `[Biểu tượng cảnh báo: ${titles}] ${wData.text}` : wData.text;
+        }
+
+        function openImageLightbox(src, caption = "Hình ảnh cảnh báo an toàn hóa chất") {
+            if (!src) return;
+            document.getElementById("lightboxImg").src = src;
+            document.getElementById("lightboxCaption").textContent = caption;
+            document.getElementById("imgLightbox").classList.add("active");
+        }
+
+        function closeImageLightbox() {
+            document.getElementById("imgLightbox").classList.remove("active");
+        }
+
         function showLoadingPopup(message = "Đang tải hồ sơ an toàn hóa chất...") {
             document.getElementById("loadingPopupText").textContent = message;
             document.getElementById("loadingPopup").classList.add("active");
@@ -351,6 +597,13 @@
 
         function hideLoadingPopup() {
             document.getElementById("loadingPopup").classList.remove("active");
+        }
+
+        function showManualSearchModal() {
+            document.getElementById("chemContent").classList.add("hidden");
+            document.getElementById("errorTitle").textContent = "Tra cứu nhanh Hóa chất trong kho";
+            document.getElementById("errorBox").classList.remove("hidden");
+            document.getElementById("manualSearchInput").focus();
         }
 
         function normalizeStr(str) {
@@ -463,6 +716,8 @@
             const chemDisplay = currentChem.formula ? `${currentChem.name} (${currentChem.formula})` : currentChem.name;
             document.getElementById("aiChemLabel").textContent = chemDisplay;
 
+            const plainWarning = getPlainWarningSummary(currentChem.storage, currentChem.safety);
+
             loadingEl.classList.remove("hidden");
             gridEl.classList.add("hidden");
             regenBtn.disabled = true;
@@ -476,7 +731,7 @@
                         formula: currentChem.formula || "",
                         safety: currentChem.safety || "",
                         properties: currentChem.properties || "",
-                        warning: currentChem.storage || "",
+                        warning: plainWarning,
                         firstaid: currentChem.firstaid || "",
                         variation_seed: variationCounter
                     })
@@ -486,11 +741,11 @@
                 const data = await res.json();
                 activeQuestions = (data.questions && data.questions.length >= 5)
                     ? data.questions.slice(0, 5)
-                    : buildClientFallbackQuestions(currentChem);
+                    : buildClientFallbackQuestions(currentChem, plainWarning);
                 engineBadge.textContent = `⚡ ${data.source || "Render AI"}`;
             } catch (err) {
                 console.warn("Sử dụng bộ 5 câu hỏi dự phòng do lỗi mạng:", err);
-                activeQuestions = buildClientFallbackQuestions(currentChem);
+                activeQuestions = buildClientFallbackQuestions(currentChem, plainWarning);
                 engineBadge.textContent = "⚡ AI Safe-Mode";
             } finally {
                 loadingEl.classList.add("hidden");
@@ -500,10 +755,8 @@
             }
         }
 
-        // Bộ 5 câu hỏi dự phòng phía trình duyệt
-        function buildClientFallbackQuestions(chem) {
+        function buildClientFallbackQuestions(chem, warningText) {
             const short = chem.formula || chem.name;
-            const warningText = chem.storage || "hóa chất có nguy cơ gây bỏng hoặc kích ứng";
             const firstAidText = chem.firstaid || "rửa ngay dưới vòi nước sạch liên tục và báo cho giáo viên";
             return [
                 {
@@ -580,7 +833,6 @@
                             </div>
                         </div>
 
-                        <!-- Khung AI Giải thích hiện ra ngay khi học sinh chọn đáp án -->
                         <div id="explain_q_${qId}" class="hidden mt-4 p-3.5 rounded-xl text-xs md:text-sm leading-relaxed border"></div>
                     </div>
                 `;
@@ -645,11 +897,28 @@
             document.getElementById("chemFormula").textContent = data.formula;
             document.getElementById("chemCas").textContent = data.cas_number || "Không có";
             document.getElementById("chemManufacturer").textContent = data.manufacturer || "Không có";
-            document.getElementById("chemProperties").textContent = data.properties || "Chưa cập nhật";
-            document.getElementById("chemWarning").textContent = data.storage || "Chưa cập nhật cảnh báo";
-            document.getElementById("chemFirstAid").textContent = data.firstaid || "Chưa cập nhật";
             document.getElementById("chemSafetyBadge").innerHTML = renderSafetyBadge(data.safety);
 
+            // 1. Render Đặc tính vật lý / hóa học dạng danh sách có icon
+            renderBulletListWithIcons(
+                "chemPropertiesList",
+                data.properties,
+                "fa-solid fa-vial text-emerald-600",
+                "bg-emerald-100"
+            );
+
+            // 2. Render Cảnh báo dạng danh sách kết hợp Hình ảnh + Biểu tượng GHS + Lưu ý
+            renderWarningSection(data.storage, data.safety);
+
+            // 3. Render Hướng dẫn sơ cứu khẩn cấp dạng danh sách có icon y tế
+            renderBulletListWithIcons(
+                "chemFirstAidList",
+                data.firstaid,
+                "fa-solid fa-staff-snake text-red-600",
+                "bg-red-100"
+            );
+
+            // 4. Render Video hướng dẫn
             renderVideoBox(data.video_url);
 
             document.getElementById("errorBox").classList.add("hidden");
@@ -659,7 +928,7 @@
             const newUrl = `${window.location.pathname}?id=${encodeURIComponent(data.id)}`;
             window.history.replaceState({}, "", newUrl);
 
-            // Gọi AI trên Render để render bộ 5 câu hỏi tương tác
+            // 5. Gọi AI trên Render để tạo 5 câu hỏi tình huống
             fetchAIQuizFromRender(false);
         }
 
@@ -750,6 +1019,10 @@
             const found = allChemicalsCache.find(c => c.id === id);
             if (found) showChemicalDetail(found);
         }
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") closeImageLightbox();
+        });
 
         loadChemicalInfo();
     </script>
